@@ -1,0 +1,10 @@
+{
+  "dir": "docs",
+  "index": "docs/README.md",
+  "triggers": [
+    ".claude-plugin/marketplace.json",
+    "core/.claude-plugin/plugin.json",
+    ".claude/lint.json",
+    ".claude/docs.json"
+  ]
+}
