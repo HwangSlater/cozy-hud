@@ -1,0 +1,8 @@
+{
+  "name": "cozy-hud",
+  "version": "0.1.0",
+  "description": "cozy-hud 코어: 부품 카드와 캐릭터를 패널·입력창 위 줄에 그린다. /hud 로 배치·캐릭터·테마를 바꾼다.",
+  "author": { "name": "HwangSlater" },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}

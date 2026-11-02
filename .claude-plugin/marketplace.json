@@ -1,0 +1,12 @@
+{
+  "name": "cozy-hud",
+  "owner": { "name": "HwangSlater" },
+  "description": "Claude Code 터미널에 캐릭터와 계기판을 붙이는 mod 모음. 코어 위에 부품과 캐릭터 팩을 골라 끼운다.",
+  "plugins": [
+    { "name": "cozy-hud", "source": "./core", "description": "코어(필수): 패널·입력창 위 줄, 캐릭터·테마, /hud 명령" },
+    { "name": "cozy-hud-characters", "source": "./packs/characters", "description": "캐릭터 팩: 클로드·동물 12종·말랑 친구 3종" },
+    { "name": "cozy-hud-tokens", "source": "./widgets/tokens", "description": "부품: 토큰 사용량" },
+    { "name": "cozy-hud-context", "source": "./widgets/context", "description": "부품: 컨텍스트 게이지" },
+    { "name": "cozy-hud-checklist", "source": "./widgets/checklist", "description": "부품: 할 일 목록 실시간" }
+  ]
+}

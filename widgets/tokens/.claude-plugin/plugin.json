@@ -1,0 +1,9 @@
+{
+  "name": "cozy-hud-tokens",
+  "version": "0.1.0",
+  "description": "cozy-hud 부품: 이번 답변과 세션 전체의 토큰 사용량, 답변별 막대그래프.",
+  "author": { "name": "HwangSlater" },
+  "license": "MIT",
+  "dependencies": ["cozy-hud"],
+  "types": "./types/index.d.ts"
+}

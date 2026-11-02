@@ -1,0 +1,27 @@
+{
+  "auto": {
+    "name": "자동 — 터미널 색 + 캐릭터 포인트 색",
+    "tones": { "text": "text", "dim": "inactive", "strong": "text", "accent": "@character", "ok": "success", "warn": "warning", "err": "error", "line": "subtle" },
+    "sweat": "#6fb7ff"
+  },
+  "basic": {
+    "name": "기본 — 터미널 색 그대로",
+    "tones": { "text": "text", "dim": "inactive", "strong": "text", "accent": "claude", "ok": "success", "warn": "warning", "err": "error", "line": "subtle" },
+    "sweat": "#6fb7ff"
+  },
+  "amber": {
+    "name": "호박 — 어두운 바탕에 호박색",
+    "tones": { "text": "#c8cad0", "dim": "#6c707b", "strong": "#eceef2", "accent": "#e3a857", "ok": "#7fbf7a", "warn": "#e0c65c", "err": "#e2675f", "line": "#3d4049" },
+    "sweat": "#6fb7ff"
+  },
+  "mint": {
+    "name": "민트 — 차분한 청록",
+    "tones": { "text": "#c3cbcf", "dim": "#66727a", "strong": "#e8eef0", "accent": "#5bb8a6", "ok": "#8cc47e", "warn": "#e6b450", "err": "#e06c6c", "line": "#2f383e" },
+    "sweat": "#6fb7ff"
+  },
+  "mono": {
+    "name": "흑백 — 색은 상태에만",
+    "tones": { "text": "#b9b9b9", "dim": "#5e5e5e", "strong": "#f2f2f2", "accent": "#f2f2f2", "ok": "#78c27a", "warn": "#d9b44a", "err": "#e05d5d", "line": "#333333" },
+    "sweat": "#6fb7ff"
+  }
+}

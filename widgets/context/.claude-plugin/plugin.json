@@ -1,0 +1,9 @@
+{
+  "name": "cozy-hud-context",
+  "version": "0.1.0",
+  "description": "cozy-hud 부품: 컨텍스트 창이 얼마나 찼는지 게이지로 보여 주고, 80%를 넘으면 캐릭터가 알려 준다.",
+  "author": { "name": "HwangSlater" },
+  "license": "MIT",
+  "dependencies": ["cozy-hud"],
+  "types": "./types/index.d.ts"
+}

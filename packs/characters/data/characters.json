@@ -1,0 +1,441 @@
+[
+ {
+  "id": "claude",
+  "name": "클로드",
+  "body": "O",
+  "eyes": [
+   2,
+   3
+  ],
+  "rows": [
+   "..OOOOOOOOOO..",
+   "..OOOOOOOOOO..",
+   "..OOKOOOOKOO..",
+   "OOOOKOOOOKOOOO",
+   "..OOOOOOOOOO..",
+   "..OOOOOOOOOO..",
+   "...O.O..O.O...",
+   "...O.O..O.O..."
+  ],
+  "alt": {
+   "3": "..OOKOOOOKOO..",
+   "6": "..O.O....O.O..",
+   "7": "..O.O....O.O.."
+  },
+  "colors": {
+   "O": "#d97757",
+   "K": "#1a1310"
+  },
+  "accent": "#d97757"
+ },
+ {
+  "id": "cat",
+  "name": "고양이",
+  "body": "C",
+  "eyes": [
+   3
+  ],
+  "rows": [
+   ".C........C.",
+   ".CC......CC.",
+   ".CCCCCCCCCC.",
+   ".CCKCCCCKCC.",
+   ".CCCCPPCCCC.",
+   "..CCCCCCCC.C",
+   "..CCCCCCCCC.",
+   "..C.C..C.C.."
+  ],
+  "alt": {
+   "5": "..CCCCCCCC..",
+   "6": "..CCCCCCCCCC",
+   "7": "...C.C..C.C."
+  },
+  "colors": {
+   "C": "#e2a35f",
+   "K": "#1a1714",
+   "P": "#f29fb0"
+  },
+  "accent": "#f29fb0"
+ },
+ {
+  "id": "penguin",
+  "name": "펭귄",
+  "body": "N",
+  "eyes": [
+   2
+  ],
+  "rows": [
+   "...NNNN...",
+   "..NNNNNN..",
+   "..NKNNKN..",
+   "..NWYYWN..",
+   ".NNWWWWNN.",
+   ".NNWWWWNN.",
+   "..NWWWWN..",
+   "..YY..YY.."
+  ],
+  "alt": {
+   "4": "NNNWWWWNNN",
+   "5": "..NWWWWN..",
+   "7": "...YY.YY.."
+  },
+  "colors": {
+   "N": "#3d5478",
+   "K": "#eef2f6",
+   "W": "#eef2f6",
+   "Y": "#f0b442"
+  },
+  "accent": "#7ab8e6"
+ },
+ {
+  "id": "chick",
+  "name": "병아리",
+  "body": "Y",
+  "eyes": [
+   2
+  ],
+  "rows": [
+   "....YY....",
+   "...YYYY...",
+   "..YKYYKY..",
+   "..YYOOYY..",
+   ".YYYYYYYY.",
+   ".YYYYYYYY.",
+   "..YYYYYY..",
+   "...O..O..."
+  ],
+  "alt": {
+   "4": "YYYYYYYYYY",
+   "5": ".YYYYYYYY.",
+   "7": "..O....O.."
+  },
+  "colors": {
+   "Y": "#f2cf4a",
+   "K": "#2a241a",
+   "O": "#ef8a3c"
+  },
+  "accent": "#f2cf4a"
+ },
+ {
+  "id": "rabbit",
+  "name": "토끼",
+  "body": "W",
+  "eyes": [
+   4
+  ],
+  "rows": [
+   "...WW..WW...",
+   "...WP..PW...",
+   "...WP..PW...",
+   "..WWWWWWWW..",
+   "..WKWWWWKW..",
+   "..WWWPPWWW..",
+   ".WWWWWWWWWW.",
+   "..WW....WW.."
+  ],
+  "alt": {
+   "0": "..WW....WW..",
+   "7": "...WW..WW..."
+  },
+  "colors": {
+   "W": "#f1eee9",
+   "P": "#f2a7b8",
+   "K": "#2a2224"
+  },
+  "accent": "#f2a7b8"
+ },
+ {
+  "id": "fox",
+  "name": "여우",
+  "body": "F",
+  "eyes": [
+   3
+  ],
+  "rows": [
+   ".F........F.",
+   ".FF......FF.",
+   ".FFFFFFFFFF.",
+   ".FKFFFFFFKF.",
+   ".WWFFFFFFWW.",
+   "..WWWKKWWW.F",
+   "...FFFFFF.FW",
+   "...F.F.F.F.."
+  ],
+  "alt": {
+   "5": "..WWWKKWWW..",
+   "6": "...FFFFFFFFW",
+   "7": "....F.F.F.F."
+  },
+  "colors": {
+   "F": "#e8823a",
+   "K": "#2a1d16",
+   "W": "#f6efe6"
+  },
+  "accent": "#e8823a"
+ },
+ {
+  "id": "puppy",
+  "name": "강아지",
+  "body": "D",
+  "eyes": [
+   2
+  ],
+  "rows": [
+   "..DDDDDDDD..",
+   ".EDDDDDDDDE.",
+   ".EDKDDDDKDE.",
+   ".EDDDWWDDDE.",
+   "..DDWKKWDD..",
+   "..DDDDDDDD.D",
+   "..DDDDDDDDD.",
+   "..D.D..D.D.."
+  ],
+  "alt": {
+   "5": "..DDDDDDDD..",
+   "6": "..DDDDDDDDDD",
+   "7": "...D.D..D.D."
+  },
+  "colors": {
+   "D": "#d9a86c",
+   "E": "#8a5a36",
+   "K": "#2a1f18",
+   "W": "#f4ead9"
+  },
+  "accent": "#d9a86c"
+ },
+ {
+  "id": "frog",
+  "name": "개구리",
+  "body": "G",
+  "eyes": [
+   1
+  ],
+  "rows": [
+   "..WW....WW..",
+   ".WKKW..WKKW.",
+   ".GGGGGGGGGG.",
+   "GGGGGGGGGGGG",
+   "GGHHHHHHHHGG",
+   ".GGGGGGGGGG.",
+   "..GGGGGGGG..",
+   ".GG.G..G.GG."
+  ],
+  "alt": {
+   "6": ".GGGGGGGGGG.",
+   "7": "GG..G..G..GG"
+  },
+  "colors": {
+   "W": "#f4f6ee",
+   "K": "#1e2a1a",
+   "G": "#7cc46a",
+   "H": "#4c8a40"
+  },
+  "accent": "#7cc46a"
+ },
+ {
+  "id": "bear",
+  "name": "곰",
+  "body": "M",
+  "eyes": [
+   2
+  ],
+  "rows": [
+   ".MM......MM.",
+   ".MMMMMMMMMM.",
+   ".MKMMMMMMKM.",
+   ".MMMLLLLMMM.",
+   ".MMMLKKLMMM.",
+   "..MMMMMMMM..",
+   ".MMMMMMMMMM.",
+   ".MMM....MMM."
+  ],
+  "alt": {
+   "5": "M.MMMMMMMM.M",
+   "7": "..MMM..MMM.."
+  },
+  "colors": {
+   "M": "#9a6a48",
+   "K": "#1f1712",
+   "L": "#d9b48c"
+  },
+  "accent": "#c4936a"
+ },
+ {
+  "id": "hamster",
+  "name": "햄스터",
+  "body": "H",
+  "eyes": [
+   2
+  ],
+  "rows": [
+   "..HH....HH..",
+   ".HHHHHHHHHH.",
+   ".HKHHHHHHKH.",
+   "PHHWWKKWWHHP",
+   ".HWWWWWWWWH.",
+   ".HWWWWWWWWH.",
+   "..HHHHHHHH..",
+   "...P....P..."
+  ],
+  "alt": {
+   "4": "HHWWWWWWWWHH",
+   "7": "..P......P.."
+  },
+  "colors": {
+   "H": "#f0b878",
+   "K": "#2a1f18",
+   "P": "#f2a0a8",
+   "W": "#fbf1e2"
+  },
+  "accent": "#f0b878"
+ },
+ {
+  "id": "octopus",
+  "name": "문어",
+  "body": "R",
+  "eyes": [
+   3
+  ],
+  "rows": [
+   "...RRRRRR...",
+   "..RWRRRRRR..",
+   "..RRRRRRRR..",
+   "..RKRRRRKR..",
+   "..RRRRRRRR..",
+   ".RRRRRRRRRR.",
+   "R.R.R..R.R.R",
+   ".R..R..R..R."
+  ],
+  "alt": {
+   "6": ".R.R.RR.R.R.",
+   "7": "R..R....R..R"
+  },
+  "colors": {
+   "R": "#e8707a",
+   "W": "#ffd9dc",
+   "K": "#2a1418"
+  },
+  "accent": "#e8707a"
+ },
+ {
+  "id": "whale",
+  "name": "고래",
+  "body": "U",
+  "eyes": [
+   4
+  ],
+  "rows": [
+   "...S.S........",
+   "....S.........",
+   "..UUUUUUU.....",
+   ".UUUUUUUUU..UU",
+   ".UKUUUUUUUUUU.",
+   ".UUUUUUUUUUU..",
+   ".WWWWWWWWWU...",
+   "..WWWWWWW....."
+  ],
+  "alt": {
+   "0": "..S...S.......",
+   "1": "...S.S........",
+   "3": ".UUUUUUUUU...U"
+  },
+  "colors": {
+   "S": "#9fd8f0",
+   "U": "#4f86c6",
+   "K": "#10213a",
+   "W": "#dbe8f5"
+  },
+  "accent": "#6fa3dd"
+ },
+ {
+  "id": "mochi",
+  "name": "찹쌀떡",
+  "body": "M",
+  "eyes": [
+   2
+  ],
+  "rows": [
+   "...MMMMMM...",
+   "..MMMMMMMM..",
+   ".MMKMMMMKMM.",
+   ".MPMMMMMMPM.",
+   ".MMMMRRMMMM.",
+   "MMMMMMMMMMMM",
+   ".MMMMMMMMMM.",
+   "..MM....MM.."
+  ],
+  "alt": {
+   "4": "MMMMMRRMMMMM",
+   "5": ".MMMMMMMMMM.",
+   "7": "...MM..MM..."
+  },
+  "colors": {
+   "M": "#f6f1ea",
+   "K": "#2b2326",
+   "P": "#f4a6b4",
+   "R": "#d9707f"
+  },
+  "accent": "#f4a6b4"
+ },
+ {
+  "id": "beanmochi",
+  "name": "콩떡",
+  "body": "V",
+  "eyes": [
+   3
+  ],
+  "rows": [
+   "......LL....",
+   "...VVLVVVV..",
+   "..VVVVVVVV..",
+   ".VVKVVVVKVV.",
+   ".VPVVRRVVPV.",
+   ".VVVVVVVVVV.",
+   "..VVVVVVVV..",
+   "..VV....VV.."
+  ],
+  "alt": {
+   "0": ".....LL.....",
+   "1": "...VVVLVVV..",
+   "7": "...VV..VV..."
+  },
+  "colors": {
+   "L": "#5fae63",
+   "V": "#bfe5c8",
+   "K": "#22302a",
+   "P": "#f2a3ae",
+   "R": "#d9707f"
+  },
+  "accent": "#8fd1a0"
+ },
+ {
+  "id": "bun",
+  "name": "호빵",
+  "body": "A",
+  "eyes": [
+   3
+  ],
+  "rows": [
+   "....AAAA....",
+   "..AAZAAZAA..",
+   ".AAAAZZAAAA.",
+   ".AAKAAAAKAA.",
+   "AAPAARRAAPAA",
+   "AAAAAAAAAAAA",
+   ".AAAAAAAAAA.",
+   "..AA....AA.."
+  ],
+  "alt": {
+   "6": "AAAAAAAAAAAA",
+   "7": ".AA......AA."
+  },
+  "colors": {
+   "A": "#f6d6b8",
+   "Z": "#d9a47a",
+   "K": "#2b2019",
+   "P": "#f29aa6",
+   "R": "#c9606e"
+  },
+  "accent": "#f0b98e"
+ }
+]
