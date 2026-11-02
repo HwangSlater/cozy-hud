@@ -18,16 +18,13 @@ cozy-hud/                       저장소 = 마켓플레이스 (.claude-plugin/m
 - [ ] widgets/tokens: 이번 답변·세션 토큰, 답변별 막대
 - [ ] widgets/context: 컨텍스트 게이지, 압축 임박 경고
 - [ ] widgets/checklist: 세션 체크리스트(`~/.claude/checklists/<세션>.md`) 실시간
-- [ ] packs/characters: 시안 3차 캐릭터(동물 8 + 말랑 친구 3), 클로드 캐릭터는 아래 「남은 결정」 참고
+- [ ] packs/characters: 시안 3차 캐릭터(동물 8 + 말랑 친구 3), 클로드 포함
 - [ ] 마켓플레이스 파일 · README 설치 안내 · `claude plugin validate`·`test` 통과
 - [ ] 공개 저장소 `HwangSlater/cozy-hud` 로 올리기
 
 ## 다음 단계 후보
 도구 기록 · 바뀐 파일 · 7일 레포 알림 · 오늘 할 일·메모 · 집중 타이머 · 위험 명령 기록 · 답변 끝 알림 · 배치 프리셋(시안 2차 A 동료 / B 관제실 / C 하루 플래너 / D 작업 흐름).
 
-## 남은 결정
-- 클로드 캐릭터(Anthropic 마스코트를 본뜬 그림)를 공개 팩에 넣을지.
-- 이 폴더의 첫 커밋(7926ea5) 작성자가 개인 이메일이라 공개 push 전에 처리 방법을 정해야 함(시안 저장소는 noreply 주소 사용).
 
 ## 참고
 - 시안: `C:\Users\doorc\Downloads\make-mods-시안\` (1차 레이아웃 · 2차 기능 조합·테마 · 3차 캐릭터)
@@ -35,3 +32,4 @@ cozy-hud/                       저장소 = 마켓플레이스 (.claude-plugin/m
 
 ## 바뀐 이력
 - 2026-11-02: 처음 작성.
+- 2026-11-02: 남은 결정 정리(클로드 포함, 작성자 noreply).
