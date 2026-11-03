@@ -36,11 +36,7 @@ const choices = (table: Record<string, string>) => Object.entries(table).map(([v
 /** 설정 열기: 보통은 HUD 패널(설정이 같이 있음), 입력창 위만 쓸 때는 설정만 띄운 패널 */
 export async function openSettings($: $) {
   if (mem.settings.layout === 'band') await $.ui.open({ id: SETTINGS_PANE, title: 'HUD 설정', focus: true, closeOnEscape: true })
-  else {
-    // 접혀 있으면 펼쳐서 연다(/hud 는 설정을 보려고 치는 것이라)
-    await update($, view, v => ({ ...v, isFolded: false }))
-    await $.ui.open({ id: PANE, title: 'HUD', focus: true })
-  }
+  else await $.ui.open({ id: PANE, title: 'HUD', focus: true })
 }
 
 /** 배치를 바꾼 뒤 설정이 보이던 자리가 사라지면 다른 자리로 옮겨 준다 */
