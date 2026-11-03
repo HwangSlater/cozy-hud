@@ -35,27 +35,33 @@
   "name": "고양이",
   "body": "C",
   "eyes": [
-   3
+   4,
+   5
   ],
   "rows": [
-   ".C........C.",
-   ".CC......CC.",
-   ".CCCCCCCCCC.",
-   ".CCKCCCCKCC.",
-   ".CCCCPPCCCC.",
-   "..CCCCCCCC.C",
-   "..CCCCCCCCC.",
-   "..C.C..C.C.."
+   "..CC..........CC..",
+   "..CCC........CCC..",
+   "..CCCCDCDDCDCCCC..",
+   ".CCCCCCCCCCCCCCCC.",
+   ".CCCHKCCCCCCHKCCC.",
+   ".CCCKKCCCCCCKKCCC.",
+   ".CPPCCCCNNCCCCPPC.",
+   "..CCCCCCCCCCCCCC..",
+   "...CCCCCCCCCCCC.C.",
+   "....CC......CC...."
   ],
   "alt": {
-   "5": "..CCCCCCCC..",
-   "6": "..CCCCCCCCCC",
-   "7": "...C.C..C.C."
+   "7": "..CCCCCCCCCCCCCC.C",
+   "8": "...CCCCCCCCCCCC...",
+   "9": ".....CC....CC....."
   },
   "colors": {
    "C": "#e2a35f",
+   "D": "#c47f3a",
    "K": "#1a1714",
-   "P": "#f29fb0"
+   "H": "#ffffff",
+   "P": "#f2a0a0",
+   "N": "#e87d8f"
   },
   "accent": "#f29fb0"
  },
