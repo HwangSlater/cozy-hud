@@ -25,6 +25,8 @@ const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
 /** 미리보기 상자의 테두리 두 칸 + 안쪽 여백 두 칸 */
 const PREVIEW_INSET = 4
+/** 넘기기 줄의 이름 칸 너비: 이름 길이가 달라도 ◀ ▶ 자리가 그대로 */
+const NAV_NAME_COLUMNS = 10
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
 
@@ -87,10 +89,12 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
         </Box>
       ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
       {nav ? (
-        <Box key="ch-nav" flexDirection="row" columnGap={1} marginTop={pet ? 0 : 1}>
+        <Box key="ch-nav" flexDirection="row" alignItems="center" columnGap={1} marginTop={pet ? 0 : 1}>
           <Button key="ch-prev" label="이전 캐릭터" onPress={nav.prev}>◀</Button>
-          <Text bold color={tones.accent}>{nav.label}</Text>
-          <Text color={tones.dim}>{nav.count}</Text>
+          <Box flexDirection="column" alignItems="center" width={NAV_NAME_COLUMNS}>
+            <Text bold color={tones.accent} wrap="truncate-end">{nav.label}</Text>
+            <Text color={tones.dim}>{nav.count}</Text>
+          </Box>
           <Button key="ch-next" label="다음 캐릭터" onPress={nav.next}>▶</Button>
         </Box>
       ) : null}
