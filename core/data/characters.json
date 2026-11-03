@@ -104,27 +104,33 @@
   "name": "병아리",
   "body": "Y",
   "eyes": [
-   2
+   4,
+   5
   ],
   "rows": [
-   "....YY....",
-   "...YYYY...",
-   "..YKYYKY..",
-   "..YYOOYY..",
-   ".YYYYYYYY.",
-   ".YYYYYYYY.",
-   "..YYYYYY..",
-   "...O..O..."
+   "........YY........",
+   ".....YYYYYYYY.....",
+   "...YYYYYYYYYYYY...",
+   "..YYYYYYYYYYYYYY..",
+   "..YYYHKYYYYHKYYY..",
+   ".DYYYKKYYYYKKYYYD.",
+   "DDYPPYYYOOYYYPPYDD",
+   ".DYYYYYYYYYYYYYYD.",
+   "..YYYYYYYYYYYYYY..",
+   "....OO......OO...."
   ],
   "alt": {
-   "4": "YYYYYYYYYY",
-   "5": ".YYYYYYYY.",
-   "7": "..O....O.."
+   "5": "DDYYYKKYYYYKKYYYDD",
+   "6": ".DYPPYYYOOYYYPPYD.",
+   "9": ".....OO....OO....."
   },
   "colors": {
-   "Y": "#f2cf4a",
-   "K": "#2a241a",
-   "O": "#ef8a3c"
+   "Y": "#f5d04a",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "D": "#e0a82a",
+   "P": "#f2a0a0",
+   "O": "#f0973a"
   },
   "accent": "#f2cf4a"
  },
