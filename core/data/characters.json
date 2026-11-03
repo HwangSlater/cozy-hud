@@ -139,26 +139,34 @@
   "name": "토끼",
   "body": "W",
   "eyes": [
-   4
+   6,
+   7
   ],
   "rows": [
-   "...WW..WW...",
-   "...WP..PW...",
-   "...WP..PW...",
-   "..WWWWWWWW..",
-   "..WKWWWWKW..",
-   "..WWWPPWWW..",
-   ".WWWWWWWWWW.",
-   "..WW....WW.."
+   "....WW......WW....",
+   "...WPW......WPW...",
+   "...WPW......WPW...",
+   "...WPW......WPW...",
+   "...WWWW....WWWW...",
+   "..WWWWWWWWWWWWWW..",
+   ".WWWWHKWWWWHKWWWW.",
+   ".WWWWKKWWWWKKWWWW.",
+   ".WBBWWWWNNWWWWBBW.",
+   "..WWWWWWWWWWWWWW..",
+   "...WWWWWWWWWWWW...",
+   "....WW......WW...."
   ],
   "alt": {
-   "0": "..WW....WW..",
-   "7": "...WW..WW..."
+   "0": ".....WW....WW.....",
+   "11": ".....WW....WW....."
   },
   "colors": {
-   "W": "#f1eee9",
-   "P": "#f2a7b8",
-   "K": "#2a2224"
+   "W": "#f4f1ec",
+   "P": "#f2a0b4",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "B": "#f2a0a0",
+   "N": "#e87d8f"
   },
   "accent": "#f2a7b8"
  },
