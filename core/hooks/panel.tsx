@@ -8,7 +8,7 @@ import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
 } from './settings'
-import { SETTINGS_PANE, mem, saveSettings, type $ } from './state'
+import { PANE, SETTINGS_PANE, mem, saveSettings, type $ } from './state'
 
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
@@ -24,15 +24,29 @@ const TABS: Record<HudTab, string> = { character: '캐릭터', layout: '배치·
 
 /** 패널이 키보드를 잡았을 때와 아닐 때 맨 위에 보이는 안내 */
 const KEY_HELP = {
-  focused: 'Tab 다음 칸 · Enter 고르기 · 숫자 1~4 탭 · Esc 닫기',
+  focused: 'Tab 다음 칸 · Enter 고르기 · 숫자 1~4 탭',
   idle: '키보드로 바꾸려면 Ctrl+X 다음 Tab 을 누르세요',
 }
+/** Esc 가 하는 일: 설정만 띄운 패널은 닫히고, HUD 패널은 키보드만 돌려준다 */
+const ESC_HELP: Record<string, string> = { [SETTINGS_PANE]: ' · Esc 닫기', [PANE]: ' · Esc 나가기' }
 
 /** 표(값 → 이름)를 Select 의 목록으로 */
 const choices = (table: Record<string, string>) => Object.entries(table).map(([value, label]) => ({ value, label }))
 
+/** 설정 열기: 보통은 HUD 패널(설정이 같이 있음), 입력창 위만 쓸 때는 설정만 띄운 패널 */
 export async function openSettings($: $) {
-  await $.ui.open({ id: SETTINGS_PANE, title: 'HUD 설정', focus: true, closeOnEscape: true })
+  if (mem.settings.layout === 'band') await $.ui.open({ id: SETTINGS_PANE, title: 'HUD 설정', focus: true, closeOnEscape: true })
+  else await $.ui.open({ id: PANE, title: 'HUD', focus: true })
+}
+
+/** 배치를 바꾼 뒤 설정이 보이던 자리가 사라지면 다른 자리로 옮겨 준다 */
+async function moveSettings($: $, site: string) {
+  const isBand = mem.settings.layout === 'band'
+  if (isBand && site === PANE) await openSettings($)
+  if (!isBand && site === SETTINGS_PANE) {
+    await openSettings($)
+    await $.ui.close({ id: SETTINGS_PANE })
+  }
 }
 
 /** 하나 고르기: 목록(Select)이 있는 화면은 목록, 없는 화면(모바일)은 버튼 줄 */
@@ -80,12 +94,16 @@ async function characterTab($: $, el: El, s: HudSettings, tones: Tones) {
   )
 }
 
-function layoutTab($: $, el: El, s: HudSettings, tones: Tones) {
+function layoutTab($: $, el: El, s: HudSettings, tones: Tones, site: string) {
   const { Box, Text } = el
   const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
+  const pickLayout = async (layout: HudSettings['layout']) => {
+    await saveSettings($, x => ({ ...x, layout }))
+    await moveSettings($, site)
+  }
   return (
     <Box flexDirection="column">
-      {pickRow(el, 'layout', '보일 곳', LAYOUTS, s.layout, v => save(x => ({ ...x, layout: v as HudSettings['layout'] })))}
+      {pickRow(el, 'layout', '보일 곳', LAYOUTS, s.layout, v => void pickLayout(v as HudSettings['layout']))}
       <Box marginTop={1}><Text color={tones.dim}>말풍선</Text></Box>
       {pickRow(el, 'talk-tools', '도구를 쓸 때', TOOL_TALK, s.speech.tools, v => save(x => ({ ...x, speech: { ...x.speech, tools: v as HudSettings['speech']['tools'] } })))}
       {pickRow(el, 'talk-react', '끝냄·경고 반응', REACT, s.speech.react, v => save(x => ({ ...x, speech: { ...x.speech, react: v as 'on' | 'off' } })))}
@@ -170,21 +188,21 @@ async function undoReset($: $) {
 /** 목록(Select)·입력칸(Input)이 없는 화면 */
 const NO_PICKERS = new Set(['mobile'])
 
-export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean) {
+export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean, site: string) {
   // 모바일 표에도 Select 가 들어 있지만 그려지지 않아서, 화면 종류로 빼 버린다
   const el = (NO_PICKERS.has(surface) ? { ...table, Select: undefined, Input: undefined } : table) as El
   const { Box, Text, Button } = el
   const s = await read($, settings)
   const v = await read($, view)
-  mem.isSettingsShown = true
+  if (site === SETTINGS_PANE) mem.isSettingsShown = true
   const body =
     v.tab === 'character' ? await characterTab($, el, s, tones)
-    : v.tab === 'layout' ? layoutTab($, el, s, tones)
+    : v.tab === 'layout' ? layoutTab($, el, s, tones, site)
     : v.tab === 'theme' ? themeTab($, el, s)
     : await cardsTab($, el, s, tones)
   return (
     <Box flexDirection="column">
-      {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused : KEY_HELP.idle}</Text>}
+      {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused + (ESC_HELP[site] ?? '') : KEY_HELP.idle}</Text>}
       <Box flexDirection="row" columnGap={1}>
         {(Object.keys(TABS) as HudTab[]).map((tab, i) => (
           <Button
