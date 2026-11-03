@@ -437,28 +437,33 @@
   "name": "호빵",
   "body": "A",
   "eyes": [
-   3
+   4,
+   5
   ],
   "rows": [
-   "....AAAA....",
-   "..AAZAAZAA..",
-   ".AAAAZZAAAA.",
-   ".AAKAAAAKAA.",
-   "AAPAARRAAPAA",
-   "AAAAAAAAAAAA",
-   ".AAAAAAAAAA.",
-   "..AA....AA.."
+   ".......S..S.......",
+   "......S..S........",
+   ".....AAAAAAAA.....",
+   "...AAAAAAAAAAAA...",
+   "..AAAHKAAAAHKAAA..",
+   ".AAAAKKAAAAKKAAAA.",
+   "AAAPPAAAKKAAAPPAAA",
+   "AAAAAAAAAAAAAAAAAA",
+   "ZAAAAAAAAAAAAAAAAZ",
+   ".YYYYYYYYYYYYYYYY."
   ],
   "alt": {
-   "6": "AAAAAAAAAAAA",
-   "7": ".AA......AA."
+   "0": "......S..S........",
+   "1": ".......S..S......."
   },
   "colors": {
-   "A": "#f6d6b8",
-   "Z": "#d9a47a",
-   "K": "#2b2019",
-   "P": "#f29aa6",
-   "R": "#c9606e"
+   "S": "#cfd6dc",
+   "A": "#fbf3e8",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "P": "#f2a0a0",
+   "Z": "#e9dcc6",
+   "Y": "#e8c98f"
   },
   "accent": "#f0b98e"
  }
