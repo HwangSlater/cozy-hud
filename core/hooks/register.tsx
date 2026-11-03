@@ -132,7 +132,7 @@ export const register: Register = on => {
     if (saved.layout !== 'band') {
       void $.ui.open({ id: PANE, title: 'HUD' })
       // 설정은 HUD 패널 안에 있으니, 예전에 따로 띄운 설정 패널이 남아 있으면 닫는다
-      void $.ui.close({ id: SETTINGS_PANE }).catch(() => undefined)
+      void $.ui.close({ id: SETTINGS_PANE })
     }
     const answer = await next(e)
     await $.hud.ready({})
