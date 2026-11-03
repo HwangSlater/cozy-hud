@@ -133,15 +133,12 @@ test('세션이 시작되면 HUD 와 HUD 설정 탭을 같이 연다', async ($,
   expect(opened).toEqual(['cozy-hud-settings', 'cozy-hud'])
 })
 
-test('넓으면 넘기는 자리에 그림이 있고, 좁으면 그림 없이 이름 목록으로 고른다', async ($, on) => {
+test('미리보기에 ◀ ▶ 와 캐릭터가 같이 있고, 탭에서는 이름 목록으로 고른다', async ($, on) => {
   const { saved } = await start($, on)
-  const wide = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
-  await wide.select({ key: 'character', value: 'mochi' })
-  expect(await wide.find({ type: 'Raster', key: 'ch-stage' })).toBeDefined()
-  await wide.unmount()
-  const narrow = await $.ui.mount({ ...SETTINGS_PANE, props: { ...SETTINGS_PANE.props, bodyColumns: 40 }, surface: 'terminal' })
-  expect(await narrow.find({ type: 'Raster', key: 'ch-stage' })).toBeUndefined()
-  await narrow.select({ key: 'character', value: 'bun' })
-  expect(saved.at(-1)?.character).toBe('bun')
-  await narrow.unmount()
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  await ui.select({ key: 'character', value: 'mochi' })
+  expect(saved.at(-1)?.character).toBe('mochi')
+  expect(await ui.find({ type: 'Raster', key: 'pet' })).toBeDefined()
+  expect(await ui.find({ type: 'Button', key: 'ch-next' })).toBeDefined()
+  await ui.unmount()
 })

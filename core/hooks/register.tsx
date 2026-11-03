@@ -5,7 +5,7 @@ import type { Register } from 'claude-code'
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
 import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
-import { SETTINGS_TITLE, drawSettings, openSettings } from './panel'
+import { SETTINGS_TITLE, characterNav, drawSettings, openSettings, type CharacterNav } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
 import {
   PANE, SETTINGS_PANE, addCharacters, loadStored, resetCharacters, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
@@ -66,8 +66,8 @@ function toolTalk(tool: string, input: { file_path?: string; pattern?: string; c
 }
 
 /** HUD 패널의 내용(캐릭터·말풍선·카드). HUD 패널과 설정 패널의 미리보기가 같이 쓴다 */
-async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string, columns: number, site: string) {
-  const { Box, Text } = el
+async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string, columns: number, site: string, nav?: CharacterNav) {
+  const { Box, Text, Button } = el
   const s = await read($, settings)
   const ch = await currentCharacter($)
   const tones = tonesFor(s, ch)
@@ -78,9 +78,11 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
   else forgetSite(site)
   return (
     <Box flexDirection="column">
-      {pet ? (
-        <Box flexDirection="row">
-          {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
+      {pet || nav ? (
+        <Box flexDirection="row" alignItems="center">
+          {nav ? <Button key="ch-prev" label="이전 캐릭터" onPress={nav.prev}>◀</Button> : null}
+          <Box marginX={nav ? 1 : 0}>{pet ? drawPet(el, surface === 'terminal', pet.cells, pet.encoded) : <Text color={tones.dim}>(없음)</Text>}</Box>
+          {nav ? <Button key="ch-next" label="다음 캐릭터" onPress={nav.next}>▶</Button> : null}
           <Box flexDirection="column" marginLeft={2} flexShrink={1}>
             {drawSpeech(el, v.speech, tones, ch)}
           </Box>
@@ -192,14 +194,18 @@ export const register: Register = on => {
     const s = await read($, settings)
     const tones = tonesFor(s, await currentCharacter($))
     const isPreview = s.layout !== 'band'
+    const nav = await characterNav($)
     if (!isPreview) forgetSite(SETTINGS_PANE)
     return (
       <Box flexDirection="column">
-        {await drawSettings($, el, tones, e.surface, e.props.isFocused, e.props.bodyColumns)}
+        {await drawSettings($, el, tones, e.surface, e.props.isFocused)}
         <Box marginTop={1} flexDirection="column" borderStyle="round" borderColor={tones.accent} paddingX={1}>
-          <Text bold color={tones.accent}>미리보기</Text>
+          <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
+            <Text bold color={tones.accent}>미리보기</Text>
+            {isPreview ? <Text color={tones.dim}>· {nav.label} {nav.count}</Text> : null}
+          </Box>
           {isPreview
-            ? await drawHud($, el, e.surface, e.props.bodyColumns - PREVIEW_INSET, SETTINGS_PANE)
+            ? await drawHud($, el, e.surface, e.props.bodyColumns - PREVIEW_INSET, SETTINGS_PANE, nav)
             : <Text color={tones.dim}>지금은 입력창 위 줄에만 보여요. 아래 줄에서 바로 확인하세요.</Text>}
         </Box>
       </Box>

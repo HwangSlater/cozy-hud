@@ -1,7 +1,7 @@
 // 캐릭터 움직임. 타이머마다 엔진에 묻지 않도록 필요한 값은 mem 에 같이 들고 있고,
 // 같은 모습(자세)은 한 번만 계산해 둔다. 자리마다 지난번과 같은 자세면 아무 일도 하지 않는다.
 import type { HudCharacter, HudMood, HudSettings, HudSize } from '../types'
-import { colorOf, frameRows, rasterCells, spriteOf, toCells, type Cell } from './look'
+import { colorOf, frameRows, rasterCells, toCells, type Cell } from './look'
 import { PANE, SETTINGS_PANE, mem, type $ } from './state'
 
 /** 속도별 프레임 간격(ms). 멈춤이면 타이머를 아예 두지 않는다 */
@@ -51,23 +51,9 @@ export function petArt(size: HudSize): PetArt | null {
   return hit
 }
 
-const thumbs = new Map<string, PetArt>()
-
-/** 설정의 캐릭터 고르기에 늘어놓는 그림: 보통 크기, 가만히 있는 모습 그대로 */
-export function thumbArt(ch: HudCharacter): PetArt {
-  let hit = thumbs.get(ch.id)
-  if (!hit) {
-    const cells = toCells(spriteOf(ch, 'medium').rows, colorOf(ch, ''))
-    hit = { cells, encoded: rasterCells(cells) }
-    thumbs.set(ch.id, hit)
-  }
-  return hit
-}
-
 /** 캐릭터 그림이 바뀌었을 때(팩이 새로 보냄) 계산해 둔 것을 버린다 */
 export function forgetArt() {
   art.clear()
-  thumbs.clear()
   shown.clear()
 }
 

@@ -3,8 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudOption, HudSettings, HudTab, HudView } from '../types'
-import { drawPet, type Tones } from './draw'
-import { thumbArt } from './motion'
+import type { Tones } from './draw'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
@@ -29,8 +28,6 @@ const KEY_HELP = {
   idle: '키보드로 바꾸려면 Ctrl+X 다음 Tab 을 누르세요',
 }
 
-/** 캐릭터 넘기기: 그림 자리 너비(그림마다 폭이 달라도 버튼이 움직이지 않게), 이보다 좁은 패널은 그림을 뺀다 */
-const STAGE = { columns: 16, minPaneColumns: 50 }
 
 /** 표(값 → 이름)를 Select 의 목록으로 */
 const choices = (table: Record<string, string>) => Object.entries(table).map(([value, label]) => ({ value, label }))
@@ -62,41 +59,31 @@ function pickList(el: El, key: string, label: string, options: readonly { value:
 const pickRow = (el: El, key: string, label: string, table: Record<string, string>, value: string, onPick: (v: string) => void) =>
   pickList(el, key, label, choices(table), value, onPick)
 
-/** ◀ ▶ 로 하나씩 넘기고, 목록으로 이름을 골라 바로 간다. 좁으면 그림은 빼고 이름만 */
-function characterPicker(el: El, list: readonly HudCharacter[], picked: string, hasStage: boolean, isTerminal: boolean, tones: Tones, onPick: (id: string) => void) {
-  const { Box, Text, Button } = el
-  const names = [...list.map(c => ({ value: c.id, label: c.name })), { value: 'none', label: '없음' }]
+/** 고를 수 있는 캐릭터 이름(마지막은 「없음」) */
+const characterNames = (list: readonly HudCharacter[]) => [...list.map(c => ({ value: c.id, label: c.name })), { value: 'none', label: '없음' }]
+
+export type CharacterNav = { label: string; count: string; prev: () => void; next: () => void }
+
+/** 미리보기에서 ◀ ▶ 로 캐릭터를 하나씩 넘길 때 쓰는 값 */
+export async function characterNav($: $): Promise<CharacterNav> {
+  const names = characterNames(Object.values(await read($, characters)))
+  const picked = (await read($, settings)).character
   const at = Math.max(0, names.findIndex(n => n.value === picked))
-  const step = (by: number) => names[(at + by + names.length) % names.length]?.value ?? 'none'
-  const ch = list.find(c => c.id === picked)
-  const thumb = hasStage && ch ? thumbArt(ch) : null
-  return (
-    <Box key="ch-picker" flexDirection="column">
-      <Box flexDirection="row" alignItems="center" columnGap={1}>
-        <Button key="ch-prev" label="이전 캐릭터" onPress={() => onPick(step(-1))}>◀</Button>
-        {hasStage ? (
-          <Box width={STAGE.columns} justifyContent="center">
-            {thumb ? drawPet(el, isTerminal, thumb.cells, thumb.encoded, 'ch-stage') : <Text color={tones.dim}>(없음)</Text>}
-          </Box>
-        ) : null}
-        <Button key="ch-next" label="다음 캐릭터" onPress={() => onPick(step(1))}>▶</Button>
-        <Box flexDirection="column" marginLeft={1}>
-          <Text bold color={tones.accent}>{names[at]?.label}</Text>
-          <Text color={tones.dim}>{at + 1} / {names.length}</Text>
-        </Box>
-      </Box>
-      <Box marginTop={1}>{pickList(el, 'character', '이름으로 찾기', names, picked, onPick)}</Box>
-    </Box>
-  )
+  const go = (by: number) => {
+    const id = names[(at + by + names.length) % names.length]?.value ?? 'none'
+    void saveSettings($, x => ({ ...x, character: id }))
+  }
+  return { label: names[at]?.label ?? '', count: `${at + 1} / ${names.length}`, prev: () => go(-1), next: () => go(1) }
 }
 
-async function characterTab($: $, el: El, s: HudSettings, tones: Tones, columns: number, isTerminal: boolean) {
+async function characterTab($: $, el: El, s: HudSettings, tones: Tones) {
   const { Box, Text } = el
   const list = Object.values(await read($, characters))
   const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
   return (
     <Box flexDirection="column">
-      {characterPicker(el, list, s.character, columns >= STAGE.minPaneColumns, isTerminal, tones, id => save(x => ({ ...x, character: id })))}
+      {pickList(el, 'character', '캐릭터', characterNames(list), s.character, id => save(x => ({ ...x, character: id })))}
+      <Text color={tones.dim}>아래 미리보기의 ◀ ▶ 로도 넘겨요</Text>
       <Box marginTop={1} />
       {pickRow(el, 'size-pane', '크기 · 패널', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
       {pickRow(el, 'size-band', '크기 · 입력창 위', SIZES, s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })))}
@@ -197,7 +184,7 @@ async function undoReset($: $) {
 /** 목록(Select)·입력칸(Input)이 없는 화면 */
 const NO_PICKERS = new Set(['mobile'])
 
-export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean, columns: number) {
+export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean) {
   // 모바일 표에도 Select 가 들어 있지만 그려지지 않아서, 화면 종류로 빼 버린다
   const el = (NO_PICKERS.has(surface) ? { ...table, Select: undefined, Input: undefined } : table) as El
   const { Box, Text, Button } = el
@@ -205,14 +192,14 @@ export async function drawSettings($: $, table: El, tones: Tones, surface: strin
   const v = await read($, view)
   mem.isSettingsShown = true
   const body =
-    v.tab === 'character' ? await characterTab($, el, s, tones, columns, surface === 'terminal')
+    v.tab === 'character' ? await characterTab($, el, s, tones)
     : v.tab === 'layout' ? layoutTab($, el, s, tones)
     : v.tab === 'theme' ? themeTab($, el, s)
     : await cardsTab($, el, s, tones)
   return (
     <Box flexDirection="column">
       {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused : KEY_HELP.idle}</Text>}
-      <Box flexDirection="row" columnGap={1}>
+      <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
         {(Object.keys(TABS) as HudTab[]).map((tab, i) => (
           <Button
             key={`tab-${tab}`}
