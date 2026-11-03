@@ -57,7 +57,9 @@ function summary(s: HudSettings, c: Catalog): string {
 
 /** 명령 하나를 적용한 새 설정과 보여 줄 글. 설정이 안 바뀌면 next 는 null */
 export function runCommand(args: string, s: HudSettings, c: Catalog): { next: HudSettings | null; text: string } {
-  const [verb = '', ...rest] = args.trim().split(/\s+/).filter(Boolean)
+  // 안내 문구의 [ ] < > 를 그대로 따라 쳐도 알아듣게 벗긴다
+  const words = args.replace(/[[\]<>]/g, ' ').trim().split(/\s+/).filter(Boolean)
+  const [verb = '', ...rest] = words
   const arg = rest.join(' ')
   const keep = (text: string) => ({ next: null, text })
   const set = (next: HudSettings, text: string) => ({ next, text })
