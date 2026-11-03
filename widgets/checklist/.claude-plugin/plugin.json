@@ -10,7 +10,7 @@
     "file": {
       "type": "string",
       "title": "체크리스트 파일(선택)",
-      "description": "마크다운 체크리스트(- [ ] / - [x]) 파일 경로. {home} 은 홈 폴더, {session} 은 세션 id 로 바뀐다. 비워 두면 Claude 의 할 일 도구를 따라간다.",
+      "description": "마크다운 체크리스트(- [ ] / - [x]) 파일 경로. {home} 은 홈 폴더, {session} 은 세션 id 로 바뀐다. 비워 두면 Claude의 할 일 도구를 따라간다.",
       "default": ""
     }
   }

@@ -87,7 +87,7 @@ Claude Code에서 한 번만 설치하세요.
 /hud character cat      캐릭터 바꾸기
 /hud theme mint         테마 바꾸기
 /hud layout pane        패널에만 보이기
-/hud reset              처음 설정으로
+/hud reset              초기화
 ```
 
 ## 내 데이터는 내 컴퓨터에

@@ -181,3 +181,18 @@ test('HUD 설정에는 탭을 닫는 버튼이 없다(두 탭은 늘 떠 있다)
   expect(await ui.find({ type: 'Button', key: 'close' })).toBeUndefined()
   await ui.unmount()
 })
+
+test('카드 탭: 숨긴 카드의 설정은 접히고, 맨 위 카드의 「위」는 아무 일도 하지 않는다', async ($, on) => {
+  const { saved } = await start($, on)
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  await ui.press({ key: 'tab-cards' })
+  expect(await ui.find({ type: 'Button', key: 'opt-context-warn-90' })).toBeDefined()
+  const before = saved.length
+  await ui.press({ key: 'up-context' })
+  expect(saved.length).toBe(before)
+  await ui.press({ key: 'vis-context' })
+  expect(saved.at(-1)?.hidden).toEqual(['context'])
+  expect(await ui.find({ type: 'Button', key: 'opt-context-warn-90' })).toBeUndefined()
+  expect(await ui.find({ type: 'Button', key: 'up-context' })).toBeDefined()
+  await ui.unmount()
+})

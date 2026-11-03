@@ -1,4 +1,4 @@
-// 체크리스트 부품: Claude 의 할 일 도구나 마크다운 파일을 따라가며 카드로 보낸다.
+// 체크리스트 부품: Claude의 할 일 도구나 마크다운 파일을 따라가며 카드로 보낸다.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
@@ -16,7 +16,7 @@ const mem = { template: '', path: '', mtime: -1, isPolling: false }
 
 function optionsFor(fileDefault: string) {
   return [
-    { key: 'file', label: '체크리스트 파일', kind: 'text' as const, value: fileDefault, placeholder: '비우면 Claude 의 할 일 도구를 따라가요 · {home} {session} 사용 가능' },
+    { key: 'file', label: '체크리스트 파일', kind: 'text' as const, value: fileDefault, placeholder: '비우면 Claude의 할 일 도구를 따라가요 · {home} {session} 사용 가능' },
     { key: 'lines', label: '보일 항목 수', kind: 'choice' as const, value: LINES_DEFAULT, choices: ['5', '8', '12'].map(v => ({ value: v, label: `${v}개` })) },
   ]
 }
@@ -103,7 +103,7 @@ async function resolvePath($: EngineInterface, template: string): Promise<string
   return template.replaceAll('{home}', home).replaceAll('{session}', await $.session.id())
 }
 
-/** 따라갈 파일을 바꾼다. 비우면 Claude 의 할 일 도구를 따라간다 */
+/** 따라갈 파일을 바꾼다. 비우면 Claude의 할 일 도구를 따라간다 */
 async function useFile($: EngineInterface, template: string) {
   mem.template = template
   mem.path = await resolvePath($, template)
@@ -140,7 +140,7 @@ export const register: Register = (on, config) => {
     return next(e)
   })
 
-  // 파일을 쓰지 않을 때만 Claude 의 할 일 도구를 따라간다
+  // 파일을 쓰지 않을 때만 Claude의 할 일 도구를 따라간다
   on('tool.call', { tool: 'TodoWrite' }, async ($, e, next) => {
     const ran = await next(e)
     if (!mem.path && e.agentId === undefined && ran.deny === undefined && !ran.isError) {

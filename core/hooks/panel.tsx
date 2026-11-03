@@ -3,7 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudLayout, HudOption, HudSettings, HudTab, HudView } from '../types'
-import { cellWidth, type Tones } from './draw'
+import { cellWidth, drawLine, type Tones } from './draw'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
@@ -24,8 +24,8 @@ const TABS: Record<HudTab, string> = { character: '캐릭터', layout: '배치·
 
 /** 패널이 키보드를 잡았을 때와 아닐 때 맨 위에 보이는 안내 */
 const KEY_HELP = {
-  focused: 'Tab 다음 칸 · Enter 고르기 · 1~4 탭 · A/D 캐릭터 넘기기 · Esc 나가기',
-  idle: '키보드로 바꾸려면 Ctrl+X 다음 Tab 을 누르세요',
+  focused: 'Tab 다음 칸 · Enter 고르기 · 1~4 탭 · A/D 캐릭터 · Esc 나가기',
+  idle: '키보드: Ctrl+X 다음 Tab',
 }
 
 /** 이만큼까지는 펼치는 목록 대신 버튼 줄로 보여 한 번에 고르게 한다 */
@@ -34,8 +34,10 @@ const MAX_BUTTON_CHOICES = 5
 const LABEL_COLUMNS = 17
 /** 고른 버튼 앞에 붙이는 표시. 색이 잘 안 보이는 터미널에서도 무엇을 골랐는지 알게 한다 */
 const PICKED_MARK = '✓'
-/** 카드별 설정 줄을 카드 이름보다 들여 쓰는 칸 */
-const OPTION_INDENT = 4
+/** 카드 순서 목록에서 한 줄 요약을 들여 쓰는 칸(순번 두 칸 + 사이 한 칸 + 보이기 칸 테두리) */
+const SUMMARY_INDENT = 5
+/** 글자 설정 입력칸이 비었을 때 보이는 말 */
+const TEXT_PLACEHOLDER = '여기에 입력'
 
 /** 항목 이름을 칸 수에 맞춰 오른쪽을 공백으로 채운다(한글은 두 칸) */
 const padLabel = (label: string) => label + ' '.repeat(Math.max(1, LABEL_COLUMNS - cellWidth(label)))
@@ -233,43 +235,77 @@ function themeTab($: $, el: El, s: HudSettings) {
   )
 }
 
-function optionRow($: $, el: El, columns: number, card: HudCard, o: HudOption, value: string) {
+/** 카드 설정 한 줄. 고르기는 버튼 줄, 글자는 이름 · 안내 · 입력칸을 줄마다 나눠 안내가 잘리지 않게 한다 */
+function optionRow($: $, el: El, columns: number, card: HudCard, o: HudOption, value: string, tones: Tones) {
   const { Box, Text } = el
   const key = `opt-${card.id}-${o.key}`
   const save = (v: string) => void saveSettings($, x => setOption(x, card.id, o.key, v))
-  const field = () => {
-    if (o.kind === 'choice') return pickList(el, columns, key, o.label, o.choices, value, save)
-    const { Input } = el as Pickers
-    if (!Input) return <Text dimColor>{o.label}  {value || '(비어 있음)'} — 이 화면에서는 바꿀 수 없어요</Text>
-    return <Input key={key} label={padLabel(o.label)} placeholder={o.placeholder} value={value} submitLabel="저장" onSubmit={v => save(v.trim())} />
-  }
-  return <Box key={`${key}-row`} marginLeft={OPTION_INDENT}>{field()}</Box>
+  if (o.kind === 'choice') return pickList(el, columns, key, o.label, o.choices, value, save)
+  const { Input } = el as Pickers
+  return (
+    <Box key={`${key}-row`} flexDirection="column">
+      <Text>{o.label}</Text>
+      <Box marginLeft={2} flexDirection="column">
+        {o.placeholder ? <Text color={tones.dim}>{o.placeholder}</Text> : null}
+        {Input
+          ? <Input key={key} placeholder={TEXT_PLACEHOLDER} value={value} submitLabel="저장" onSubmit={v => save(v.trim())} />
+          : <Text color={tones.dim}>{value || '(비어 있음)'} — 이 화면에서는 바꿀 수 없어요</Text>}
+      </Box>
+    </Box>
+  )
+}
+
+/** 「보일 카드와 순서」 한 줄: 순번 · 보이기 칸(✓) · 위 · 아래. 맨 위·맨 아래의 위·아래도 흐리게 남겨 줄이 흔들리지 않게 한다 */
+function cardOrderRow($: $, el: El, all: Readonly<Record<string, HudCard>>, card: HudCard, i: number, count: number, s: HudSettings, titleColumns: number, tones: Tones) {
+  const { Box, Text, Button } = el
+  const isShown = !s.hidden.includes(card.id)
+  const move = (by: -1 | 1) => () => void saveSettings($, x => moveCard(all, x, card.id, by))
+  const still = () => {}
+  const title = card.title + ' '.repeat(Math.max(0, titleColumns - cellWidth(card.title)))
+  // 줄 아래에 그 카드가 지금 보여 주는 한 줄 요약(입력창 위 줄과 같은 것). 숨긴 카드는 (숨김), 요약이 없으면 (요약 없음)
+  const summary = !isShown
+    ? <Text color={tones.dim}>(숨김)</Text>
+    : card.brief?.length ? drawLine(el, card.brief, tones, `brief-${card.id}`) : <Text color={tones.dim}>(요약 없음)</Text>
+  return (
+    <Box key={`order-${card.id}`} flexDirection="column">
+      <Box flexDirection="row" columnGap={1}>
+        <Text color={tones.dim}>{String(i + 1).padStart(2)}</Text>
+        <Button key={`vis-${card.id}`} variant={isShown ? 'primary' : undefined} onPress={() => void saveSettings($, x => toggleHidden(x, card.id))}>
+          {(isShown ? PICKED_MARK : ' ') + title}
+        </Button>
+        <Button key={`up-${card.id}`} dimColor={i === 0 ? true : undefined} onPress={i === 0 ? still : move(-1)}>위</Button>
+        <Button key={`down-${card.id}`} dimColor={i === count - 1 ? true : undefined} onPress={i === count - 1 ? still : move(1)}>아래</Button>
+      </Box>
+      {summary ? <Box marginLeft={SUMMARY_INDENT} overflow="hidden">{summary}</Box> : null}
+    </Box>
+  )
 }
 
 async function cardsTab($: $, el: El, columns: number, s: HudSettings, tones: Tones) {
-  const { Box, Text, Button } = el
+  const { Box, Text } = el
   const all = await read($, cards)
   const list = ordered(all, s)
   if (list.length === 0) return <Text color={tones.dim}>보여 줄 카드가 없어요. 부품 mod(cozy-hud-tokens 등)를 설치하세요.</Text>
+  const titleColumns = Math.max(...list.map(c => cellWidth(c.title)))
+  const withOptions = list.filter(c => (c.options ?? []).length > 0)
+  const shown = withOptions.filter(c => !s.hidden.includes(c.id))
+  const hidden = withOptions.filter(c => s.hidden.includes(c.id))
   return (
     <Box flexDirection="column">
-      {list.map((card, i) => {
-        const isHidden = s.hidden.includes(card.id)
+      {section(el, columns, tones, 'sec-cards', '보일 카드와 순서', true)}
+      {list.map((card, i) => cardOrderRow($, el, all, card, i, list.length, s, titleColumns, tones))}
+      {shown.map(card => {
         const values = optionValues(card, s)
         return (
-          <Box key={`card-${card.id}`} flexDirection="column" marginBottom={1}>
-            <Box flexDirection="row" columnGap={1}>
-              <Button key={`vis-${card.id}`} onPress={() => void saveSettings($, x => toggleHidden(x, card.id))}>
-                {isHidden ? '숨김' : '보임'}
-              </Button>
-              <Text bold color={isHidden ? tones.dim : tones.strong}>{card.title}</Text>
-              {i > 0 ? <Button key={`up-${card.id}`} onPress={() => void saveSettings($, x => moveCard(all, x, card.id, -1))}>위로</Button> : null}
-              {i < list.length - 1 ? <Button key={`down-${card.id}`} onPress={() => void saveSettings($, x => moveCard(all, x, card.id, 1))}>아래로</Button> : null}
-            </Box>
-            {(card.options ?? []).map(o => optionRow($, el, columns - OPTION_INDENT, card, o, values[o.key] ?? o.value))}
+          <Box key={`card-${card.id}`} flexDirection="column">
+            {section(el, columns, tones, `sec-card-${card.id}`, card.title)}
+            {(card.options ?? []).map(o => optionRow($, el, columns, card, o, values[o.key] ?? o.value, tones))}
           </Box>
         )
       })}
+      {hidden.length > 0
+        ? <Box marginTop={1}><Text color={tones.dim}>{`숨긴 카드(${hidden.map(c => c.title).join(', ')})의 설정은 보이게 하면 나타나요`}</Text></Box>
+        : null}
     </Box>
   )
 }
@@ -304,7 +340,15 @@ export async function drawSettings($: $, table: El, tones: Tones, surface: strin
     : await cardsTab($, el, columns, s, tones)
   return (
     <Box flexDirection="column">
-      {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused : KEY_HELP.idle}</Text>}
+      {/* 맨 위 한 줄: 왼쪽 키보드 안내(길면 왼쪽 안에서 줄바꿈), 오른쪽 끝 초기화. 누른 뒤에는 같은 자리에 되돌리기 */}
+      <Box flexDirection="row" justifyContent="space-between" columnGap={1}>
+        <Box flexShrink={1}>
+          {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused : KEY_HELP.idle}</Text>}
+        </Box>
+        {v.canUndo
+          ? <Button key="undo" variant="primary" onPress={() => void undoReset($)}>되돌리기</Button>
+          : <Button key="reset" onPress={() => void resetAll($)}>초기화</Button>}
+      </Box>
       <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
         {(Object.keys(TABS) as HudTab[]).map((tab, i) => (
           <Button
@@ -319,11 +363,6 @@ export async function drawSettings($: $, table: El, tones: Tones, surface: strin
         ))}
       </Box>
       <Box marginTop={1} flexDirection="column">{body}</Box>
-      <Box marginTop={1} flexDirection="row" columnGap={1}>
-        {v.canUndo
-          ? <Button key="undo" variant="primary" onPress={() => void undoReset($)}>되돌리기</Button>
-          : <Button key="reset" onPress={() => void resetAll($)}>처음 설정으로</Button>}
-      </Box>
     </Box>
   )
 }
