@@ -307,30 +307,67 @@
  {
   "id": "bear",
   "name": "곰",
-  "body": "M",
+  "body": "B",
   "eyes": [
-   2
+   4,
+   5
   ],
   "rows": [
-   ".MM......MM.",
-   ".MMMMMMMMMM.",
-   ".MKMMMMMMKM.",
-   ".MMMLLLLMMM.",
-   ".MMMLKKLMMM.",
-   "..MMMMMMMM..",
-   ".MMMMMMMMMM.",
-   ".MMM....MMM."
+   "..BBB........BBB..",
+   "..BIBBBBBBBBBBIB..",
+   "..BBBBBBBBBBBBBB..",
+   ".BBBBBBBBBBBBBBBB.",
+   ".BBBBHKBBBBHKBBBB.",
+   ".BBBBKKBBBBKKBBBB.",
+   ".BPPBBBMKKMBBBPPB.",
+   "..BBBBBMMMMBBBBB..",
+   "...BBBBBBBBBBBB...",
+   "....BB......BB...."
   ],
   "alt": {
-   "5": "M.MMMMMMMM.M",
-   "7": "..MMM..MMM.."
+   "9": ".....BB....BB....."
   },
   "colors": {
-   "M": "#9a6a48",
-   "K": "#1f1712",
-   "L": "#d9b48c"
+   "B": "#9a6a45",
+   "I": "#c99a72",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "P": "#f2a0a0",
+   "M": "#e8cba5"
   },
-  "accent": "#c4936a"
+  "accent": "#c08a5e"
+ },
+ {
+  "id": "panda",
+  "name": "판다",
+  "body": "W",
+  "eyes": [
+   4,
+   5
+  ],
+  "rows": [
+   "..DDD........DDD..",
+   "..DDDWWWWWWWWDDD..",
+   "..WWWWWWWWWWWWWW..",
+   ".WWWWWWWWWWWWWWWW.",
+   ".WWWDHDWWWWDHDWWW.",
+   ".WWWDDDWWWWDDDWWW.",
+   ".WPPWWWWKKWWWWPPW.",
+   "..DDWWWWWWWWWWDD..",
+   "...DDWWWWWWWWDD...",
+   "....DD......DD...."
+  ],
+  "alt": {
+   "9": ".....DD....DD....."
+  },
+  "colors": {
+   "D": "#2b2622",
+   "W": "#f6f3ee",
+   "H": "#ffffff",
+   "P": "#f2a0a0",
+   "K": "#1a1714"
+  },
+  "accent": "#b8c0c8"
  },
  {
   "id": "hamster",
