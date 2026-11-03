@@ -277,27 +277,30 @@
   "name": "개구리",
   "body": "G",
   "eyes": [
-   1
+   1,
+   2
   ],
   "rows": [
-   "..WW....WW..",
-   ".WKKW..WKKW.",
-   ".GGGGGGGGGG.",
-   "GGGGGGGGGGGG",
-   "GGHHHHHHHHGG",
-   ".GGGGGGGGGG.",
-   "..GGGGGGGG..",
-   ".GG.G..G.GG."
+   "...GGGG....GGGG...",
+   "..GGHKGG..GGHKGG..",
+   "..GGKKGGGGGGKKGG..",
+   ".GGGGGGGGGGGGGGGG.",
+   ".GPPGGGGGGGGGGPPG.",
+   "GGGGGGKGGGGKGGGGGG",
+   "GGGGGGGKKKKGGGGGGG",
+   ".GGGGLLLLLLLLGGGG.",
+   "..GGGLLLLLLLLGGG..",
+   ".GGG..........GGG."
   ],
   "alt": {
-   "6": ".GGGGGGGGGG.",
-   "7": "GG..G..G..GG"
+   "9": "..GGG........GGG.."
   },
   "colors": {
-   "W": "#f4f6ee",
-   "K": "#1e2a1a",
    "G": "#7cc46a",
-   "H": "#4c8a40"
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "P": "#f2a0a0",
+   "L": "#d4eeb0"
   },
   "accent": "#7cc46a"
  },
