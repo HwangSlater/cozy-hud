@@ -399,123 +399,38 @@
   "accent": "#f0b878"
  },
  {
-  "id": "octopus",
-  "name": "문어",
-  "body": "R",
-  "eyes": [
-   3
-  ],
-  "rows": [
-   "...RRRRRR...",
-   "..RWRRRRRR..",
-   "..RRRRRRRR..",
-   "..RKRRRRKR..",
-   "..RRRRRRRR..",
-   ".RRRRRRRRRR.",
-   "R.R.R..R.R.R",
-   ".R..R..R..R."
-  ],
-  "alt": {
-   "6": ".R.R.RR.R.R.",
-   "7": "R..R....R..R"
-  },
-  "colors": {
-   "R": "#e8707a",
-   "W": "#ffd9dc",
-   "K": "#2a1418"
-  },
-  "accent": "#e8707a"
- },
- {
-  "id": "whale",
-  "name": "고래",
-  "body": "U",
-  "eyes": [
-   4
-  ],
-  "rows": [
-   "...S.S........",
-   "....S.........",
-   "..UUUUUUU.....",
-   ".UUUUUUUUU..UU",
-   ".UKUUUUUUUUUU.",
-   ".UUUUUUUUUUU..",
-   ".WWWWWWWWWU...",
-   "..WWWWWWW....."
-  ],
-  "alt": {
-   "0": "..S...S.......",
-   "1": "...S.S........",
-   "3": ".UUUUUUUUU...U"
-  },
-  "colors": {
-   "S": "#9fd8f0",
-   "U": "#4f86c6",
-   "K": "#10213a",
-   "W": "#dbe8f5"
-  },
-  "accent": "#6fa3dd"
- },
- {
   "id": "mochi",
   "name": "찹쌀떡",
-  "body": "M",
+  "body": "W",
   "eyes": [
-   2
+   4,
+   5
   ],
   "rows": [
-   "...MMMMMM...",
-   "..MMMMMMMM..",
-   ".MMKMMMMKMM.",
-   ".MPMMMMMMPM.",
-   ".MMMMRRMMMM.",
-   "MMMMMMMMMMMM",
-   ".MMMMMMMMMM.",
-   "..MM....MM.."
+   "......RRRRRR......",
+   "....WWRRRRRRWW....",
+   "..WWWWWWWWWWWWWW..",
+   ".WWWWWWWWWWWWWWWW.",
+   ".WWWWHKWWWWHKWWWW.",
+   "WWWWWKKWWWWKKWWWWW",
+   "WWWPPWWWKKWWWPPWWW",
+   "SWWWWWWWWWWWWWWWWS",
+   ".SSWWWWWWWWWWWWSS.",
+   "...SSSSSSSSSSSS..."
   ],
   "alt": {
-   "4": "MMMMMRRMMMMM",
-   "5": ".MMMMMMMMMM.",
-   "7": "...MM..MM..."
+   "1": "....WWWRRRRWWW....",
+   "9": "....SSSSSSSSSS...."
   },
   "colors": {
-   "M": "#f6f1ea",
-   "K": "#2b2326",
-   "P": "#f4a6b4",
-   "R": "#d9707f"
+   "R": "#e5566b",
+   "W": "#f6f2ea",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "P": "#f2a0a0",
+   "S": "#e3dccf"
   },
   "accent": "#f4a6b4"
- },
- {
-  "id": "beanmochi",
-  "name": "콩떡",
-  "body": "V",
-  "eyes": [
-   3
-  ],
-  "rows": [
-   "......LL....",
-   "...VVLVVVV..",
-   "..VVVVVVVV..",
-   ".VVKVVVVKVV.",
-   ".VPVVRRVVPV.",
-   ".VVVVVVVVVV.",
-   "..VVVVVVVV..",
-   "..VV....VV.."
-  ],
-  "alt": {
-   "0": ".....LL.....",
-   "1": "...VVVLVVV..",
-   "7": "...VV..VV..."
-  },
-  "colors": {
-   "L": "#5fae63",
-   "V": "#bfe5c8",
-   "K": "#22302a",
-   "P": "#f2a3ae",
-   "R": "#d9707f"
-  },
-  "accent": "#8fd1a0"
  },
  {
   "id": "bun",
