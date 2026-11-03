@@ -65,7 +65,7 @@ function toolTalk(tool: string, input: { file_path?: string; pattern?: string; c
 
 /** HUD 패널의 내용(캐릭터·말풍선·카드). HUD 패널과 설정 패널의 미리보기가 같이 쓴다 */
 async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string, columns: number, site: string) {
-  const { Box, Text, Button } = el
+  const { Box, Text } = el
   const s = await read($, settings)
   const ch = await currentCharacter($)
   const tones = tonesFor(s, ch)
@@ -86,11 +86,6 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
       ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
       {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
       {shown.map(card => drawCard(el, card, columns, tones))}
-      {site === PANE ? (
-        <Box marginTop={1}>
-          <Button key="open-settings" hotkey="s" onPress={() => void openSettings($)}>설정</Button>
-        </Box>
-      ) : null}
     </Box>
   )
 }
