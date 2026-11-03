@@ -48,7 +48,7 @@ Claude Code 프롬프트에서 코어와 원하는 것을 설치합니다(처음
 
 ## 부품·캐릭터 만들기
 
-부품은 `$.hud.put({ id, title, lines, brief })` 로 카드를 보내는 작은 mod 입니다. 색은 직접 고르지 않고 `dim`·`ok`·`warn` 같은 역할만 적습니다. 형식은 [core/types/index.d.ts](core/types/index.d.ts) 에 있습니다. 캐릭터는 픽셀 글자 그림(12~14×8)과 색표를 `$.hud.characters({ list })` 로 넘깁니다 — [packs/characters/data/characters.json](packs/characters/data/characters.json) 참고.
+부품은 `$.hud.put({ id, title, lines, brief })` 로 카드를 보내는 작은 mod 입니다. 색은 직접 고르지 않고 `dim`·`ok`·`warn` 같은 역할만 적습니다. 형식은 [core/types/index.d.ts](core/types/index.d.ts) 에 있습니다. 캐릭터는 픽셀 글자 그림(가로 12~18칸 × 세로 8~10픽셀)과 색표를 `$.hud.characters({ list })` 로 넘깁니다 — [core/data/characters.json](core/data/characters.json) 참고.
 
 ## 라이선스
 

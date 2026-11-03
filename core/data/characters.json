@@ -4,27 +4,29 @@
   "name": "클로드",
   "body": "O",
   "eyes": [
-   2,
-   3
+   3,
+   4
   ],
   "rows": [
-   "..OOOOOOOOOO..",
-   "..OOOOOOOOOO..",
-   "..OOKOOOOKOO..",
-   "OOOOKOOOOKOOOO",
-   "..OOOOOOOOOO..",
-   "..OOOOOOOOOO..",
-   "...O.O..O.O...",
-   "...O.O..O.O..."
+   ".....OOOOOOOO.....",
+   "...OOOOOOOOOOOO...",
+   "..OOOOOOOOOOOOOO..",
+   ".OOOOHKOOOOHKOOOO.",
+   ".OOOOKKOOOOKKOOOO.",
+   "OOOPPOOOKKOOOPPOOO",
+   ".OOOOOOOOOOOOOOOO.",
+   "..OOOOOOOOOOOOOO..",
+   "...OOOOOOOOOOOO...",
+   "....OO......OO...."
   ],
   "alt": {
-   "3": "..OOKOOOOKOO..",
-   "6": "..O.O....O.O..",
-   "7": "..O.O....O.O.."
+   "9": ".....OO....OO....."
   },
   "colors": {
    "O": "#d97757",
-   "K": "#1a1310"
+   "K": "#1a1310",
+   "H": "#ffffff",
+   "P": "#f2a0a0"
   },
   "accent": "#d97757"
  },
