@@ -4,12 +4,12 @@ import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudOption, HudSettings, HudTab, HudView } from '../types'
 import { drawPet, type Tones } from './draw'
-import { rasterCells } from './look'
+import { drawnAt, forgetSite, petArt } from './motion'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
 } from './settings'
-import { SETTINGS_PANE, mem, petCells, saveSettings, type $ } from './state'
+import { SETTINGS_PANE, mem, saveSettings, type $ } from './state'
 
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
@@ -53,13 +53,15 @@ const pickRow = (el: El, key: string, label: string, table: Record<string, strin
 async function characterTab($: $, el: El, s: HudSettings, tones: Tones, isTerminal: boolean) {
   const { Box, Text, Button } = el
   const list = Object.values(await read($, characters))
-  const cells = await petCells($, s.size.pane)
+  const pet = petArt(s.size.pane)
+  if (pet) drawnAt(SETTINGS_PANE, pet.encoded)
+  else forgetSite(SETTINGS_PANE)
   const current = s.character === 'none' ? '없음' : list.find(c => c.id === s.character)?.name ?? s.character
   const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
   return (
     <Box flexDirection="column">
       <Box flexDirection="row">
-        {cells ? drawPet(el, isTerminal, cells, rasterCells(cells)) : <Text color={tones.dim}>(캐릭터 없음)</Text>}
+        {pet ? drawPet(el, isTerminal, pet.cells, pet.encoded) : <Text color={tones.dim}>(캐릭터 없음)</Text>}
         <Box flexDirection="column" marginLeft={3}>
           <Text bold color={tones.strong}>{current}</Text>
           {pickRow(el, 'size-pane', '크기 · 패널', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
@@ -76,7 +78,7 @@ async function characterTab($: $, el: El, s: HudSettings, tones: Tones, isTermin
           </Button>
         ))}
       </Box>
-      {list.length === 0 ? <Text color={tones.dim}>캐릭터 팩(cozy-hud-characters)을 설치하면 여기서 고를 수 있어요.</Text> : null}
+      {list.length === 0 ? <Text color={tones.dim}>캐릭터를 불러오지 못했어요. 코어를 다시 설치해 보세요.</Text> : null}
     </Box>
   )
 }
@@ -179,7 +181,6 @@ export async function drawSettings($: $, table: El, tones: Tones, surface: strin
   const s = await read($, settings)
   const v = await read($, view)
   mem.isSettingsShown = true
-  mem.lastBlit.delete(SETTINGS_PANE)
   const body =
     v.tab === 'character' ? await characterTab($, el, s, tones, isTerminal)
     : v.tab === 'layout' ? layoutTab($, el, s, tones)

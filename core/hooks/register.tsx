@@ -2,12 +2,14 @@
 import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
-import type { HudCard, HudCharacter, HudLive, HudMood, HudSettings, HudView } from '../types'
+import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
 import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
-import { rasterCells } from './look'
+import { drawnAt, forgetSite, petArt } from './motion'
 import { drawSettings, openSettings } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
-import { PANE, SETTINGS_PANE, loadStored, mem, petCells, saveSettings, sendOptions, type $ } from './state'
+import {
+  PANE, SETTINGS_PANE, addCharacters, loadStored, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
+} from './state'
 
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
@@ -16,9 +18,6 @@ const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS
 const live = atom({ plugin: 'cozy-hud', key: 'live' } as const, { mood: 'idle', speech: '', since: 0 } as HudLive, { shape: 'live-1' })
 const view = atom({ plugin: 'cozy-hud', key: 'view' } as const, { tab: 'character', canUndo: false } as HudView, { shape: 'view-2' })
 
-/** 움직임의 가장 짧은 간격. 「보통」은 두 번에 한 번, 「느리게」는 네 번에 한 번 프레임이 넘어간다 */
-const TICK_MS = 125
-const TICKS_PER_FRAME = { fast: 1, normal: 2, slow: 4, off: 0 } as const
 /** 기뻐하거나 걱정하는 표정이 남는 시간 */
 const REACT_MS = 2500
 /** 컨텍스트가 이만큼 차면 땀 */
@@ -26,10 +25,6 @@ const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
-
-async function setMood($: $, mood: HudMood, speech: string) {
-  await update($, live, () => ({ mood, speech, since: Date.now() }))
-}
 
 async function restMood($: $) {
   const usage = await $.session.usage().catch(() => null)
@@ -49,27 +44,6 @@ function tonesFor(s: HudSettings, ch: HudCharacter | null): Tones {
 async function currentCharacter($: $): Promise<HudCharacter | null> {
   const s = await read($, settings)
   return s.character === 'none' ? null : (await read($, characters))[s.character] ?? null
-}
-
-// 터미널에서는 다시 그리지 않고 캐릭터 칸만 바꿔 끼운다. 자리마다 크기가 다를 수 있다
-async function animate($: $) {
-  const s = await read($, settings)
-  const every = TICKS_PER_FRAME[s.motion.speed]
-  if (every === 0 || ++mem.tick % every !== 0) return
-  mem.frame++
-  const sites: [string | null, HudSettings['size']['pane']][] = [
-    [PANE, s.size.pane], [mem.bandSite, s.size.band], [mem.isSettingsShown ? SETTINGS_PANE : null, s.size.pane],
-  ]
-  for (const [site, size] of sites) {
-    if (!site) continue
-    const cells = await petCells($, size)
-    if (!cells) continue
-    const encoded = rasterCells(cells)
-    if (mem.lastBlit.get(site) === encoded) continue
-    const r = await $.ui.blit({ requestId: site, key: 'pet', cells: encoded }).catch(() => ({ deny: 'error' }))
-    if (!('deny' in r) || r.deny === undefined) mem.lastBlit.set(site, encoded)
-    else if (site === SETTINGS_PANE) mem.isSettingsShown = false
-  }
 }
 
 async function wakeAfterTurn($: $) {
@@ -94,7 +68,7 @@ export const register: Register = on => {
   on('engine.create', async (_$, e, next) => {
     const built = await next(e)
     const ack = async () => ({ isDone: true as const })
-    return { ...built, hud: { put: ack, drop: ack, characters: ack, say: ack, option: ack } }
+    return { ...built, hud: { put: ack, drop: ack, characters: ack, say: ack, option: ack, ready: ack } }
   })
 
   on('hud.put', async ($, e, next) => {
@@ -108,7 +82,7 @@ export const register: Register = on => {
     return next(e)
   })
   on('hud.characters', async ($, e, next) => {
-    await update($, characters, all => ({ ...all, ...Object.fromEntries(e.list.map(ch => [ch.id, ch])) }))
+    await addCharacters($, e.list)
     return next(e)
   })
   on('hud.say', async ($, e, next) => {
@@ -124,10 +98,14 @@ export const register: Register = on => {
     mem.themes = JSON.parse(await $.fs.read(`${$.plugin.root}/themes.json`)) as Record<string, ThemeSpec>
     const saved = fromStore(await loadStored($))
     await update($, settings, () => saved)
+    await syncFromState($)
+    // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
+    await addCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
     await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
     if (saved.layout !== 'band') void $.ui.open({ id: PANE, title: 'HUD' })
-    $.clock.every(TICK_MS, () => void animate($))
-    return next(e)
+    const answer = await next(e)
+    await $.hud.ready({})
+    return answer
   })
 
   // 이름 없이 /hud 는 설정 패널, 뒤에 말을 붙이면 예전처럼 바로 바꾼다
@@ -187,13 +165,14 @@ export const register: Register = on => {
     const tones = tonesFor(s, ch)
     const shown = arrange(await read($, cards), s)
     const v = await read($, live)
-    const cells = await petCells($, s.size.pane)
-    mem.lastBlit.delete(PANE)
+    const pet = petArt(s.size.pane)
+    if (pet) drawnAt(PANE, pet.encoded)
+    else forgetSite(PANE)
     return (
       <Box flexDirection="column">
-        {cells ? (
+        {pet ? (
           <Box flexDirection="row">
-            {drawPet(el, e.surface === 'terminal', cells, rasterCells(cells))}
+            {drawPet(el, e.surface === 'terminal', pet.cells, pet.encoded)}
             <Box flexDirection="column" marginLeft={2} flexShrink={1}>
               {drawSpeech(el, v.speech, tones, ch)}
             </Box>
@@ -209,18 +188,21 @@ export const register: Register = on => {
     const s = await read($, settings)
     if (e.props.hasSurvey || s.layout === 'pane') return next(e)
     mem.bandSite = e.requestId ?? null
-    mem.lastBlit.delete(mem.bandSite ?? '')
     const el = $.ui.resolve(e)
     const { Box } = el
     const ch = await currentCharacter($)
     const tones = tonesFor(s, ch)
     const v = await read($, live)
     const brief = briefLine(arrange(await read($, cards), s))
-    const cells = await petCells($, s.size.band)
+    const pet = petArt(s.size.band)
+    if (mem.bandSite) {
+      if (pet) drawnAt(mem.bandSite, pet.encoded)
+      else forgetSite(mem.bandSite)
+    }
     return (
       <Box flexDirection="row">
-        {cells ? drawPet(el, e.surface === 'terminal', cells, rasterCells(cells)) : null}
-        <Box flexDirection="column" marginLeft={cells ? 2 : 0} flexShrink={1}>
+        {pet ? drawPet(el, e.surface === 'terminal', pet.cells, pet.encoded) : null}
+        <Box flexDirection="column" marginLeft={pet ? 2 : 0} flexShrink={1}>
           {drawSpeech(el, v.speech, tones, ch)}
           {brief.length ? drawLine(el, brief, tones, 'brief') : null}
         </Box>

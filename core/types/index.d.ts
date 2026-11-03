@@ -71,6 +71,8 @@ export type Hud = {
   say: (args: HudSay) => Promise<HudAck>
   /** 코어가 부르고 부품이 듣는다: 카드 설정 값이 정해지거나 바뀌었을 때 */
   option: (args: HudOptionValues) => Promise<HudAck>
+  /** 코어가 부르고 팩·부품이 듣는다: 코어가 (다시) 불러와졌으니 캐릭터·카드를 다시 보내 달라 */
+  ready: (args: Record<string, never>) => Promise<HudAck>
 }
 
 /** 사용자가 고른 값(세션이 바뀌어도 남음) */

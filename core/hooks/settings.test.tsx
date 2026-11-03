@@ -44,7 +44,8 @@ async function start($: Parameters<Body>[0], on: Parameters<Body>[1]) {
     const seed = e.plugin === 'cozy-hud' ? SEEDED[e.key] : undefined
     return seed ? { value: { value: { shape: seed.shape, value: seeded[e.key] }, version: 1 } } : next(e)
   })
-  on('fs.read', () => ({ value: THEMES }))
+  // 코어가 읽는 파일: 테마와 기본 캐릭터
+  on('fs.read', (_, e) => ({ value: e.path.endsWith('themes.json') ? THEMES : '[]' }))
   on('store.get', () => ({ value: undefined }))
   on('store.set', (_, e) => {
     saved.push(e.value as Stored)

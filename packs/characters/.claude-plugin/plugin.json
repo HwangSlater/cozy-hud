@@ -1,8 +1,0 @@
-{
-  "name": "cozy-hud-characters",
-  "version": "0.1.0",
-  "description": "cozy-hud 캐릭터 팩: 클로드·동물 12종·말랑 친구 3종(찹쌀떡·콩떡·호빵). /hud character 로 고른다.",
-  "author": { "name": "HwangSlater" },
-  "license": "MIT",
-  "dependencies": ["cozy-hud"]
-}
