@@ -48,20 +48,19 @@ export const SETTINGS_TITLE = 'HUD 설정'
 
 /** 설정 탭을 앞으로 꺼내고 키보드를 준다. Esc 는 키보드만 돌려주고 탭은 남는다 */
 export async function openSettings($: $) {
-  mem.dismissed.delete(SETTINGS_PANE)
   await $.ui.open({ id: SETTINGS_PANE, title: SETTINGS_TITLE, focus: true })
 }
 
 /**
  * 「HUD 설정」·「HUD」 두 탭이 늘 같이 열려 있게 한다. 세션 시작·다시 불러오기·답변이 끝날 때 부른다.
- * 다시 불러오기나 그리기 오류로 엔진이 탭을 내려도 되살리고, 사람이 직접 닫은 탭은 그대로 둔다.
+ * 사람은 두 탭을 닫을 수 없게 막아 두었고(register 의 ui.close), 다시 불러오기·그리기 오류로 엔진이 내린 탭을 되살린다.
  * 설정을 먼저 열어 HUD 가 앞에 온다. 열지 못하면 까닭을 디버그 기록에 남긴다.
  */
 export async function ensurePanes($: $, layout: HudLayout) {
   const open = new Set((await $.ui.panes().catch(() => [])).map(p => p.id))
   const wanted = [{ id: SETTINGS_PANE, title: SETTINGS_TITLE }, ...(layout === 'band' ? [] : [{ id: PANE, title: 'HUD' }])]
   for (const pane of wanted) {
-    if (open.has(pane.id) || mem.dismissed.has(pane.id)) continue
+    if (open.has(pane.id)) continue
     const opened = await $.ui.open(pane).catch((err: unknown) => ({ isPlaced: false as const, reason: String(err) }))
     if (!opened.isPlaced) $.ui.log(`cozy-hud: 「${pane.title}」 탭을 열지 못했어요 — ${opened.reason}`, { to: 'debug' })
   }
@@ -324,7 +323,6 @@ export async function drawSettings($: $, table: El, tones: Tones, surface: strin
         {v.canUndo
           ? <Button key="undo" variant="primary" onPress={() => void undoReset($)}>되돌리기</Button>
           : <Button key="reset" onPress={() => void resetAll($)}>처음 설정으로</Button>}
-        <Button key="close" role="dismiss" onPress={() => void $.ui.close({ id: SETTINGS_PANE })}>닫기</Button>
       </Box>
     </Box>
   )

@@ -174,3 +174,10 @@ test('이름 버튼으로 캐릭터 격자를 펼치고, 고르거나 다시 누
   expect(await ui.find({ type: 'Button', key: 'pick-bun' })).toBeUndefined()
   await ui.unmount()
 })
+
+test('HUD 설정에는 탭을 닫는 버튼이 없다(두 탭은 늘 떠 있다)', async ($, on) => {
+  await start($, on)
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  expect(await ui.find({ type: 'Button', key: 'close' })).toBeUndefined()
+  await ui.unmount()
+})

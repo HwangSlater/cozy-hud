@@ -176,9 +176,12 @@ export const register: Register = on => {
     return { text }
   })
 
-  // 사람이 닫은 탭(✕·닫기 버튼)은 기억해 저절로 다시 열지 않는다. 엔진이 내린 것(unload)은 다시 연다
+  // 「HUD」·「HUD 설정」 두 탭은 늘 떠 있어야 해서(사용자 결정) 사람이 ✕ 로 닫는 것을 막는다.
+  // HUD 탭은 배치를 「입력창 위만」으로 바꿀 때(코어가 닫음)만 닫힌다. 엔진이 내리는 것(unload)은 막을 수 없어 ensurePanes 가 되살린다
   on('ui.close', async ($, e, next) => {
-    if ((e.id === PANE || e.id === SETTINGS_PANE) && e.origin.kind !== 'unload') mem.dismissed.add(e.id)
+    // next 없이 답하면 엔진이 탭을 닫지 않는다
+    if (e.id === SETTINGS_PANE && e.origin.kind !== 'unload') return { value: undefined }
+    if (e.id === PANE && e.origin.kind === 'person') return { value: undefined }
     return next(e)
   })
 
