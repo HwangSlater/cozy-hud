@@ -123,3 +123,8 @@ test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는
   expect((tab as { props?: { hotkey?: string } } | undefined)?.props?.hotkey).toBe('3')
   await ui.unmount()
 })
+
+test('세션이 시작되면 HUD 와 HUD 설정 탭을 같이 연다', async ($, on) => {
+  const { opened } = await start($, on)
+  expect(opened).toEqual(['cozy-hud-settings', 'cozy-hud'])
+})

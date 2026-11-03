@@ -5,7 +5,7 @@ import type { Register } from 'claude-code'
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
 import { briefLine, drawCard, drawLine, drawPet, drawRule, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
-import { drawSettings, openSettings } from './panel'
+import { SETTINGS_TITLE, drawSettings, openSettings } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
 import {
   PANE, SETTINGS_PANE, addCharacters, loadStored, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
@@ -129,7 +129,11 @@ export const register: Register = on => {
     // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
     await addCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
     await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
-    if (saved.layout !== 'band') void $.ui.open({ id: PANE, title: 'HUD' })
+    // HUD 와 HUD 설정은 늘 탭 두 개로 같이 둔다(설정을 먼저 열어 HUD 가 앞에 오게)
+    void (async () => {
+      await $.ui.open({ id: SETTINGS_PANE, title: SETTINGS_TITLE })
+      if (saved.layout !== 'band') await $.ui.open({ id: PANE, title: 'HUD' })
+    })()
     const answer = await next(e)
     await $.hud.ready({})
     return answer

@@ -24,15 +24,18 @@ const TABS: Record<HudTab, string> = { character: '캐릭터', layout: '배치·
 
 /** 패널이 키보드를 잡았을 때와 아닐 때 맨 위에 보이는 안내 */
 const KEY_HELP = {
-  focused: 'Tab 다음 칸 · Enter 고르기 · 숫자 1~4 탭 · Esc 닫기',
+  focused: 'Tab 다음 칸 · Enter 고르기 · 숫자 1~4 탭 · Esc 나가기',
   idle: '키보드로 바꾸려면 Ctrl+X 다음 Tab 을 누르세요',
 }
 
 /** 표(값 → 이름)를 Select 의 목록으로 */
 const choices = (table: Record<string, string>) => Object.entries(table).map(([value, label]) => ({ value, label }))
 
+export const SETTINGS_TITLE = 'HUD 설정'
+
+/** 설정 탭을 앞으로 꺼내고 키보드를 준다. Esc 는 키보드만 돌려주고 탭은 남는다 */
 export async function openSettings($: $) {
-  await $.ui.open({ id: SETTINGS_PANE, title: 'HUD 설정', focus: true, closeOnEscape: true })
+  await $.ui.open({ id: SETTINGS_PANE, title: SETTINGS_TITLE, focus: true })
 }
 
 /** 하나 고르기: 목록(Select)이 있는 화면은 목록, 없는 화면(모바일)은 버튼 줄 */
