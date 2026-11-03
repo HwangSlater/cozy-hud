@@ -70,28 +70,32 @@
   "name": "펭귄",
   "body": "N",
   "eyes": [
-   2
+   4,
+   5
   ],
   "rows": [
-   "...NNNN...",
-   "..NNNNNN..",
-   "..NKNNKN..",
-   "..NWYYWN..",
-   ".NNWWWWNN.",
-   ".NNWWWWNN.",
-   "..NWWWWN..",
-   "..YY..YY.."
+   "......NNNNNN......",
+   "....NNNNNNNNNN....",
+   "...NNNNNNNNNNNN...",
+   "..NNNWWWWWWWWNNN..",
+   "..NNWHKWWWWHKWNN..",
+   ".NNNWKKWWWWKKWNNN.",
+   "NNNPPWWWYYWWWPPNNN",
+   ".NNNWWWWWWWWWWNNN.",
+   "..NNNWWWWWWWWNNN..",
+   "....YYY....YYY...."
   ],
   "alt": {
-   "4": "NNNWWWWNNN",
-   "5": "..NWWWWN..",
-   "7": "...YY.YY.."
+   "6": ".NNPPWWWYYWWWPPNN.",
+   "9": ".....YYY..YYY....."
   },
   "colors": {
    "N": "#3d5478",
-   "K": "#eef2f6",
    "W": "#eef2f6",
-   "Y": "#f0b442"
+   "Y": "#f0b442",
+   "K": "#1a1714",
+   "H": "#ffffff",
+   "P": "#f2a0a0"
   },
   "accent": "#7ab8e6"
  },
