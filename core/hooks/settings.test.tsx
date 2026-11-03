@@ -65,12 +65,14 @@ async function start($: Parameters<Body>[0], on: Parameters<Body>[1]) {
 }
 
 for (const surface of ['terminal', 'desktop'] as const) {
-  test(`캐릭터 버튼을 누르면 저장된다 (${surface})`, async ($, on) => {
+  test(`◀ ▶ 로 넘기면 저장된다 (${surface})`, async ($, on) => {
     const { saved } = await start($, on)
     const ui = await $.ui.mount({ ...SETTINGS_PANE, surface })
-    expect(await ui.find({ type: 'Button', key: 'ch-bun' })).toBeDefined()
-    await ui.press({ key: 'ch-bun' })
+    // 고른 캐릭터(claude)가 목록에 없으면 첫 캐릭터(mochi)에서 시작한다
+    await ui.press({ key: 'ch-next' })
     expect(saved.at(-1)?.character).toBe('bun')
+    await ui.press({ key: 'ch-prev' })
+    expect(saved.at(-1)?.character).toBe('mochi')
     await ui.unmount()
   })
 
@@ -88,7 +90,7 @@ for (const surface of ['terminal', 'desktop'] as const) {
   test(`처음 설정으로 되돌린 뒤 되돌리기 (${surface})`, async ($, on) => {
     const { saved } = await start($, on)
     const ui = await $.ui.mount({ ...SETTINGS_PANE, surface })
-    await ui.press({ key: 'ch-mochi' })
+    await ui.select({ key: 'character', value: 'mochi' })
     await ui.press({ key: 'reset' })
     expect(saved.at(-1)?.character).toBe('claude')
     expect(await ui.find({ type: 'Button', key: 'undo' })).toBeDefined()
@@ -117,7 +119,7 @@ test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는
   await start($, on)
   const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
   // 시험의 캐릭터 목록에는 기본 캐릭터가 없어서 하나를 고른다
-  await ui.press({ key: 'ch-mochi' })
+  await ui.select({ key: 'character', value: 'mochi' })
   expect(await ui.find({ type: 'Raster', key: 'pet' })).toBeDefined()
   const tab = await ui.find({ type: 'Button', key: 'tab-theme' })
   expect((tab as { props?: { hotkey?: string } } | undefined)?.props?.hotkey).toBe('3')
@@ -131,13 +133,14 @@ test('세션이 시작되면 HUD 와 HUD 설정 탭을 같이 연다', async ($,
   expect(opened).toEqual(['cozy-hud-settings', 'cozy-hud'])
 })
 
-test('넓으면 캐릭터 그림을 늘어놓고, 좁으면 이름 목록으로 고른다', async ($, on) => {
+test('넓으면 넘기는 자리에 그림이 있고, 좁으면 그림 없이 이름 목록으로 고른다', async ($, on) => {
   const { saved } = await start($, on)
   const wide = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
-  expect(await wide.find({ type: 'Raster', key: 'thumb-bun' })).toBeDefined()
+  await wide.select({ key: 'character', value: 'mochi' })
+  expect(await wide.find({ type: 'Raster', key: 'ch-stage' })).toBeDefined()
   await wide.unmount()
   const narrow = await $.ui.mount({ ...SETTINGS_PANE, props: { ...SETTINGS_PANE.props, bodyColumns: 40 }, surface: 'terminal' })
-  expect(await narrow.find({ type: 'Raster', key: 'thumb-bun' })).toBeUndefined()
+  expect(await narrow.find({ type: 'Raster', key: 'ch-stage' })).toBeUndefined()
   await narrow.select({ key: 'character', value: 'bun' })
   expect(saved.at(-1)?.character).toBe('bun')
   await narrow.unmount()
