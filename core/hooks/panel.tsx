@@ -2,13 +2,13 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
-import type { HudCard, HudCharacter, HudOption, HudSettings, HudTab, HudView } from '../types'
+import type { HudCard, HudCharacter, HudLayout, HudOption, HudSettings, HudTab, HudView } from '../types'
 import { cellWidth, type Tones } from './draw'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
 } from './settings'
-import { SETTINGS_PANE, mem, saveSettings, type $ } from './state'
+import { PANE, SETTINGS_PANE, mem, saveSettings, type $ } from './state'
 
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
@@ -48,7 +48,23 @@ export const SETTINGS_TITLE = 'HUD 설정'
 
 /** 설정 탭을 앞으로 꺼내고 키보드를 준다. Esc 는 키보드만 돌려주고 탭은 남는다 */
 export async function openSettings($: $) {
+  mem.dismissed.delete(SETTINGS_PANE)
   await $.ui.open({ id: SETTINGS_PANE, title: SETTINGS_TITLE, focus: true })
+}
+
+/**
+ * 「HUD 설정」·「HUD」 두 탭이 늘 같이 열려 있게 한다. 세션 시작·다시 불러오기·답변이 끝날 때 부른다.
+ * 다시 불러오기나 그리기 오류로 엔진이 탭을 내려도 되살리고, 사람이 직접 닫은 탭은 그대로 둔다.
+ * 설정을 먼저 열어 HUD 가 앞에 온다. 열지 못하면 까닭을 디버그 기록에 남긴다.
+ */
+export async function ensurePanes($: $, layout: HudLayout) {
+  const open = new Set((await $.ui.panes().catch(() => [])).map(p => p.id))
+  const wanted = [{ id: SETTINGS_PANE, title: SETTINGS_TITLE }, ...(layout === 'band' ? [] : [{ id: PANE, title: 'HUD' }])]
+  for (const pane of wanted) {
+    if (open.has(pane.id) || mem.dismissed.has(pane.id)) continue
+    const opened = await $.ui.open(pane).catch((err: unknown) => ({ isPlaced: false as const, reason: String(err) }))
+    if (!opened.isPlaced) $.ui.log(`cozy-hud: 「${pane.title}」 탭을 열지 못했어요 — ${opened.reason}`, { to: 'debug' })
+  }
 }
 
 /** 버튼 하나가 차지하는 칸: 「[ 이름 ]」 + 사이 한 칸 */
@@ -203,12 +219,14 @@ function themeTab($: $, el: El, s: HudSettings) {
       {Object.entries(mem.themes).map(([id, t]) => {
         const swatch = ['accent', 'ok', 'warn', 'err'].map(k => t.tones[k] ?? 'text')
         return (
-          <Box key={`theme-${id}`} flexDirection="row">
+          // 좁은 판에서는 색 견본이 다음 줄로 내려가게(판 밖으로 밀리지 않게) 감싼다
+          <Box key={`theme-${id}`} flexDirection="row" flexWrap="wrap" columnGap={1}>
             <Button key={`th-${id}`} variant={id === s.theme ? 'primary' : undefined} onPress={() => void saveSettings($, x => ({ ...x, theme: id }))}>
-              {t.name}
+              {(id === s.theme ? PICKED_MARK : ' ') + t.name}
             </Button>
-            <Text> </Text>
-            {swatch.map((c, i) => <Text key={`sw-${id}-${i}`} color={c === '@character' ? 'claude' : c}>■</Text>)}
+            <Box flexDirection="row">
+              {swatch.map((c, i) => <Text key={`sw-${id}-${i}`} color={c === '@character' ? 'claude' : c}>■</Text>)}
+            </Box>
           </Box>
         )
       })}
@@ -224,7 +242,7 @@ function optionRow($: $, el: El, columns: number, card: HudCard, o: HudOption, v
     if (o.kind === 'choice') return pickList(el, columns, key, o.label, o.choices, value, save)
     const { Input } = el as Pickers
     if (!Input) return <Text dimColor>{o.label}  {value || '(비어 있음)'} — 이 화면에서는 바꿀 수 없어요</Text>
-    return <Input key={key} label={`${o.label}  `} placeholder={o.placeholder} value={value} submitLabel="저장" onSubmit={v => save(v.trim())} />
+    return <Input key={key} label={padLabel(o.label)} placeholder={o.placeholder} value={value} submitLabel="저장" onSubmit={v => save(v.trim())} />
   }
   return <Box key={`${key}-row`} marginLeft={OPTION_INDENT}>{field()}</Box>
 }

@@ -27,7 +27,29 @@
    "K": "#1a1310",
    "P": "#f2a0a0"
   },
-  "accent": "#d97757"
+  "accent": "#d97757",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     "..OOOOOOOO..",
+     "..OOOOOOOO..",
+     "..OHKOOHKO..",
+     "OOOKKOOKKOOO",
+     "..OPOOOOPO..",
+     "..OOOOOOOO..",
+     "..O.O..O.O..",
+     "..O.O..O.O.."
+    ],
+    "alt": {
+     "6": ".O.O....O.O.",
+     "7": ".O.O....O.O."
+    }
+   }
+  }
  },
  {
   "id": "cat",
@@ -62,7 +84,29 @@
    "P": "#f2a0a0",
    "N": "#e87d8f"
   },
-  "accent": "#f29fb0"
+  "accent": "#f29fb0",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     ".CC......CC.",
+     ".CCCCDDCCCC.",
+     "CCHKCCCCHKCC",
+     "CCKKCCCCKKCC",
+     "CPCCCNNCCCPC",
+     ".CCCCCCCCCC.",
+     "..CCCCCCCC.C",
+     "..CC....CC.."
+    ],
+    "alt": {
+     "6": "..CCCCCCCCC.",
+     "7": "...CC..CC..."
+    }
+   }
+  }
  },
  {
   "id": "penguin",
@@ -96,7 +140,29 @@
    "H": "#ffffff",
    "P": "#f2a0a0"
   },
-  "accent": "#7ab8e6"
+  "accent": "#7ab8e6",
+  "sizes": {
+   "small": {
+    "eyes": [
+     3,
+     4
+    ],
+    "rows": [
+     "...NNNNNN...",
+     "..NNNNNNNN..",
+     ".NNWWWWWWNN.",
+     ".NWHKWWHKWN.",
+     "NNWKKWWKKWNN",
+     "NNPWWYYWWPNN",
+     ".NNWWWWWWNN.",
+     "..YY....YY.."
+    ],
+    "alt": {
+     "5": ".NPWWYYWWPN.",
+     "7": "...YY..YY..."
+    }
+   }
+  }
  },
  {
   "id": "chick",
@@ -131,7 +197,29 @@
    "P": "#f2a0a0",
    "O": "#f0973a"
   },
-  "accent": "#f2cf4a"
+  "accent": "#f2cf4a",
+  "sizes": {
+   "small": {
+    "eyes": [
+     3,
+     4
+    ],
+    "rows": [
+     ".....YY.....",
+     "...YYYYYY...",
+     "..YYYYYYYY..",
+     ".YYHKYYHKYY.",
+     "DYYKKYYKKYYD",
+     "DYPYYOOYYPYD",
+     ".YYYYYYYYYY.",
+     "...OO..OO..."
+    ],
+    "alt": {
+     "4": "DDYKKYYKKYDD",
+     "7": "..OO....OO.."
+    }
+   }
+  }
  },
  {
   "id": "rabbit",
@@ -167,7 +255,31 @@
    "B": "#f2a0a0",
    "N": "#e87d8f"
   },
-  "accent": "#f2a7b8"
+  "accent": "#f2a7b8",
+  "sizes": {
+   "small": {
+    "eyes": [
+     5,
+     6
+    ],
+    "rows": [
+     "..WW....WW..",
+     "..WP....PW..",
+     "..WP....PW..",
+     "..WWW..WWW..",
+     ".WWWWWWWWWW.",
+     ".WHKWWWWHKW.",
+     ".WKKWWWWKKW.",
+     ".BWWWNNWWWB.",
+     "..WWWWWWWW..",
+     "...WW..WW..."
+    ],
+    "alt": {
+     "0": "...WW..WW...",
+     "9": "..WW....WW.."
+    }
+   }
+  }
  },
  {
   "id": "fox",
@@ -201,7 +313,29 @@
    "P": "#f2a0a0",
    "D": "#4a3428"
   },
-  "accent": "#e8823a"
+  "accent": "#e8823a",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     ".FF......FF.",
+     ".FWFFFFFFWF.",
+     "FFHKFFFFHKFF",
+     "FFKKFFFFKKFF",
+     "WPPWWKKWWPPW",
+     ".WWWWWWWWWW.",
+     "..FFFFFFFF.W",
+     "..DD....DD.."
+    ],
+    "alt": {
+     "6": "..FFFFFFFFW.",
+     "7": "...DD..DD..."
+    }
+   }
+  }
  },
  {
   "id": "arcticfox",
@@ -235,7 +369,29 @@
    "P": "#f2a0a0",
    "G": "#8f9ba5"
   },
-  "accent": "#8fb8d0"
+  "accent": "#8fb8d0",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     ".SS......SS.",
+     ".SWSSSSSSWS.",
+     "SSHKSSSSHKSS",
+     "SSKKSSSSKKSS",
+     "WPPWWKKWWPPW",
+     ".WWWWWWWWWW.",
+     "..SSSSSSSS.W",
+     "..GG....GG.."
+    ],
+    "alt": {
+     "6": "..SSSSSSSSW.",
+     "7": "...GG..GG..."
+    }
+   }
+  }
  },
  {
   "id": "puppy",
@@ -269,7 +425,29 @@
    "P": "#f2a0a0",
    "W": "#eeeeee"
   },
-  "accent": "#d9a86c"
+  "accent": "#d9a86c",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     "..TTTTTTTT..",
+     ".ETTTTTTTTE.",
+     "EETHKTTHKTEE",
+     "EETKKTTKKTEE",
+     ".EPTWKKWTPE.",
+     "..TTWWWWTT..",
+     "..TTTTTTTT.T",
+     "..TT....TT.."
+    ],
+    "alt": {
+     "6": "..TTTTTTTTT.",
+     "7": "...TT..TT..."
+    }
+   }
+  }
  },
  {
   "id": "frog",
@@ -301,7 +479,28 @@
    "P": "#f2a0a0",
    "L": "#d4eeb0"
   },
-  "accent": "#7cc46a"
+  "accent": "#7cc46a",
+  "sizes": {
+   "small": {
+    "eyes": [
+     1,
+     2
+    ],
+    "rows": [
+     ".GGG....GGG.",
+     ".GHKG..GHKG.",
+     ".GKKGGGGKKG.",
+     "GGGGGGGGGGGG",
+     "GPGGKGGKGGPG",
+     "GGGGGKKGGGGG",
+     ".GGLLLLLLGG.",
+     "GGG......GGG"
+    ],
+    "alt": {
+     "7": ".GGG....GGG."
+    }
+   }
+  }
  },
  {
   "id": "bear",
@@ -334,7 +533,28 @@
    "P": "#f2a0a0",
    "M": "#e8cba5"
   },
-  "accent": "#c08a5e"
+  "accent": "#c08a5e",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     ".BB......BB.",
+     ".BIBBBBBBIB.",
+     "BBHKBBBBHKBB",
+     "BBKKBBBBKKBB",
+     "BPBBMKKMBBPB",
+     ".BBBBMMBBBB.",
+     "..BBBBBBBB..",
+     "..BB....BB.."
+    ],
+    "alt": {
+     "7": "...BB..BB..."
+    }
+   }
+  }
  },
  {
   "id": "panda",
@@ -366,7 +586,28 @@
    "P": "#f2a0a0",
    "K": "#1a1714"
   },
-  "accent": "#b8c0c8"
+  "accent": "#b8c0c8",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     ".DD......DD.",
+     ".DDWWWWWWDD.",
+     "WDHDWWWWDHDW",
+     "WDDDWWWWDDDW",
+     "WPWWWKKWWWPW",
+     ".DDWWWWWWDD.",
+     "..DWWWWWWD..",
+     "..DD....DD.."
+    ],
+    "alt": {
+     "7": "...DD..DD..."
+    }
+   }
+  }
  },
  {
   "id": "hamster",
@@ -402,7 +643,28 @@
    "P": "#f2a0a0",
    "N": "#e87d8f"
   },
-  "accent": "#e0a050"
+  "accent": "#e0a050",
+  "sizes": {
+   "small": {
+    "eyes": [
+     2,
+     3
+    ],
+    "rows": [
+     ".EE......EE.",
+     ".EIQQQQQQIE.",
+     "QQHKQQQQHKQQ",
+     "QWKKQQQQKKWQ",
+     "WPPWWNNWWPPW",
+     "WWWWWWWWWWWW",
+     ".QWWWWWWWWQ.",
+     "..II....II.."
+    ],
+    "alt": {
+     "7": "...II..II..."
+    }
+   }
+  }
  },
  {
   "id": "mochi",
@@ -436,7 +698,28 @@
    "P": "#f2a0a0",
    "S": "#e3dccf"
   },
-  "accent": "#f4a6b4"
+  "accent": "#f4a6b4",
+  "sizes": {
+   "small": {
+    "eyes": [
+     3,
+     4
+    ],
+    "rows": [
+     "....RRRR....",
+     "..WWRRRRWW..",
+     ".WWWWWWWWWW.",
+     "WWHKWWWWHKWW",
+     "WWKKWWWWKKWW",
+     "WPPWWKKWWPPW",
+     "SWWWWWWWWWWS",
+     ".SSSSSSSSSS."
+    ],
+    "alt": {
+     "7": "..SSSSSSSS.."
+    }
+   }
+  }
  },
  {
   "id": "bun",
@@ -471,6 +754,27 @@
    "Z": "#e9dcc6",
    "Y": "#e8c98f"
   },
-  "accent": "#f0b98e"
+  "accent": "#f0b98e",
+  "sizes": {
+   "small": {
+    "eyes": [
+     3,
+     4
+    ],
+    "rows": [
+     "....S..S....",
+     "...AAAAAA...",
+     ".AAAAAAAAAA.",
+     "AAHKAAAAHKAA",
+     "AAKKAAAAKKAA",
+     "APPAAKKAAPPA",
+     "ZAAAAAAAAAAZ",
+     ".YYYYYYYYYY."
+    ],
+    "alt": {
+     "0": "...S..S....."
+    }
+   }
+  }
  }
 ]

@@ -9,9 +9,22 @@ const SPACE = 0x20
 /** 땀방울 픽셀. 캐릭터 색 글자와 겹치지 않게 글자가 아닌 기호를 쓴다(예전 'B' 는 곰·토끼 몸 색과 겹쳐 몸이 땀색으로 칠해졌다) */
 const SWEAT = '~'
 
-/** 고른 크기의 그림. 그 크기가 없으면 기본(보통) 그림 */
+/** 그림을 가로·세로 두 배로(픽셀 하나 → 2×2). 눈 줄·일할 때 바뀌는 줄 번호도 같이 옮긴다 */
+export function doubled(sp: HudSprite): HudSprite {
+  const twice = (row: string) => [...row].map(px => px + px).join('')
+  return {
+    rows: sp.rows.flatMap(row => [twice(row), twice(row)]),
+    eyes: sp.eyes.flatMap(i => [i * 2, i * 2 + 1]),
+    alt: Object.fromEntries(Object.entries(sp.alt).flatMap(([i, row]) => [[String(Number(i) * 2), twice(row)], [String(Number(i) * 2 + 1), twice(row)]])),
+  }
+}
+
+/** 고른 크기의 그림. 크게: 따로 그린 그림이 없으면 보통 그림을 두 배로. 작게: 따로 그린 그림이 없으면 보통 그림 */
 export function spriteOf(ch: HudCharacter, size: HudSize): HudSprite {
-  return (size === 'medium' ? undefined : ch.sizes?.[size]) ?? ch
+  if (size === 'medium') return ch
+  const drawn = ch.sizes?.[size]
+  if (drawn) return drawn
+  return size === 'large' ? doubled(ch) : ch
 }
 
 /** 기분과 프레임 번호에 따라 이번에 그릴 픽셀 줄 */

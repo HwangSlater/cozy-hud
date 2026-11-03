@@ -29,6 +29,7 @@ async function start($: Parameters<Body>[0], on: Parameters<Body>[1], speed = 'n
   on('store.set', () => ({ value: undefined }))
   on('command.register', () => ({ value: { command: 'hud' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
+  on('ui.panes', () => ({ value: [] }))
   on('ui.blit', (_, e) => {
     blits.push(e.requestId)
     return { value: {} }

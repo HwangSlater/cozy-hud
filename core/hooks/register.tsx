@@ -5,7 +5,7 @@ import type { Register } from 'claude-code'
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
 import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
-import { SETTINGS_TITLE, characterNav, drawCharacterGrid, drawSettings, openSettings, type CharacterNav } from './panel'
+import { characterNav, drawCharacterGrid, drawSettings, ensurePanes, openSettings, type CharacterNav } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
 import {
   PANE, SETTINGS_PANE, addCharacters, loadStored, resetCharacters, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
@@ -25,6 +25,8 @@ const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
 /** 미리보기 상자의 테두리 두 칸 + 안쪽 여백 두 칸 */
 const PREVIEW_INSET = 4
+/** 캐릭터 옆에 말풍선을 둘 때 말풍선에 남겨야 할 최소 칸(이보다 좁으면 아래로) */
+const MIN_SPEECH_COLUMNS = 16
 /** 캐릭터 이름 버튼의 「[ 」·「 ▾ ]」가 더 차지하는 칸 */
 const NAME_BUTTON_EXTRA = 6
 
@@ -99,9 +101,10 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
       {drawSpeech(el, speech, tones, ch)}
     </Box>
   ) : pet ? (
-    <Box flexDirection="row">
+    // 캐릭터 옆에 말풍선 자리가 모자라면(크게 고른 좁은 판) 말풍선을 아래로 내린다
+    <Box flexDirection={columns - (pet.cells[0]?.length ?? 0) - 2 >= MIN_SPEECH_COLUMNS ? 'row' : 'column'}>
       {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
-      <Box flexDirection="column" marginLeft={2} flexShrink={1}>
+      <Box flexDirection="column" marginLeft={columns - (pet.cells[0]?.length ?? 0) - 2 >= MIN_SPEECH_COLUMNS ? 2 : 0} flexShrink={1}>
         {drawSpeech(el, speech, tones, ch)}
       </Box>
     </Box>
@@ -151,11 +154,8 @@ export const register: Register = on => {
     const saved = fromStore(await loadStored($))
     await update($, settings, () => saved)
     await syncFromState($)
-    // HUD 와 HUD 설정은 늘 탭 두 개로 같이 둔다(설정을 먼저 열어 HUD 가 앞에 오게)
-    void (async () => {
-      await $.ui.open({ id: SETTINGS_PANE, title: SETTINGS_TITLE })
-      if (saved.layout !== 'band') await $.ui.open({ id: PANE, title: 'HUD' })
-    })()
+    // HUD 와 HUD 설정은 늘 탭 두 개로 같이 둔다. 세션 시작을 붙잡지 않게 기다리지 않는다
+    void ensurePanes($, saved.layout)
     // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
     await resetCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
     await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
@@ -174,6 +174,12 @@ export const register: Register = on => {
     const { next, text } = runCommand(e.args, s, { themes: mem.themes, characters: await read($, characters), cards: await read($, cards) })
     if (next) await saveSettings($, () => next)
     return { text }
+  })
+
+  // 사람이 닫은 탭(✕·닫기 버튼)은 기억해 저절로 다시 열지 않는다. 엔진이 내린 것(unload)은 다시 연다
+  on('ui.close', async ($, e, next) => {
+    if ((e.id === PANE || e.id === SETTINGS_PANE) && e.origin.kind !== 'unload') mem.dismissed.add(e.id)
+    return next(e)
   })
 
   on('ui.close', { id: SETTINGS_PANE }, async ($, e, next) => {
@@ -203,7 +209,10 @@ export const register: Register = on => {
     .catch(($, e, next) => next(e))
 
   on('turn.complete', async ($, e, next) => {
-    if (e.agentId === undefined) await wakeAfterTurn($)
+    if (e.agentId === undefined) {
+      await wakeAfterTurn($)
+      void ensurePanes($, (await read($, settings)).layout)
+    }
     return next(e)
   })
 

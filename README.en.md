@@ -32,6 +32,10 @@ Once Claude is working, the screen is just text piling up. It is hard to tell at
 - A speech bubble says what Claude is doing with each tool, like "reading register.tsx".
 - Install only the cards you want: tokens, context, to-dos. Any mix looks like one design.
 
+<div align="center">
+<img src="docs/images/hud.png" alt="The HUD pane in use: character, speech bubble, to-do, context and token cards" width="380">
+</div>
+
 ## Get started
 
 Install once in Claude Code.
@@ -68,7 +72,7 @@ Use the mouse or keyboard in the "HUD settings" tab. Changes show up in the prev
 
 | Tab | What you pick |
 | --- | --- |
-| Character | Size in the pane and above the prompt, motion speed, time until sleep |
+| Character | Size in the pane and above the prompt (large, medium, small), motion speed, time until sleep |
 | Layout · bubbles | Where it shows, tool bubbles, reactions to finishing and warnings |
 | Theme | Auto · Basic · Amber · Mint · Mono |
 | Cards | Show or hide, order, per-card settings |

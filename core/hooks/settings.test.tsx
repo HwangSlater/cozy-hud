@@ -58,6 +58,8 @@ async function start($: Parameters<Body>[0], on: Parameters<Body>[1]) {
     return { value: { isPlaced: true } }
   })
   on('ui.close', () => ({ value: undefined }))
+  // 열린 탭 목록: 시험이 연 탭을 그대로 돌려준다
+  on('ui.panes', () => ({ value: opened.map(id => ({ id, title: id, isShown: true, isFocused: false, isPlaced: true })) }))
   on('session.start', (_, e) => ({ cwd: e.cwd }))
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 

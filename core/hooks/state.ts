@@ -38,6 +38,8 @@ export const mem = {
   undo: null as HudSettings | null,
   /** 설정 패널이 그려져 있는지(캐릭터 미리보기를 움직일지) */
   isSettingsShown: false,
+  /** 사람이 직접 닫은 탭(✕·닫기). 다시 열라고 할 때(/hud, 배치 바꾸기)까지 저절로 열지 않는다 */
+  dismissed: new Set<string>(),
 }
 
 /** 세션 시작·다시 불러오기: atom 에 남은 값으로 사본을 채운다 */
@@ -93,7 +95,10 @@ export async function saveSettings($: $, change: (s: HudSettings) => HudSettings
   // 배치가 바뀔 때만 HUD 패널을 열고 닫는다(설정 패널을 보는 중에 앞을 가로채지 않게)
   if (next.layout === before.layout) return
   if (next.layout === 'band') await $.ui.close({ id: PANE })
-  else await $.ui.open({ id: PANE, title: 'HUD' })
+  else {
+    mem.dismissed.delete(PANE)
+    await $.ui.open({ id: PANE, title: 'HUD' })
+  }
 }
 
 export function loadStored($: $) {

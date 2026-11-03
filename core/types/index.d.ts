@@ -51,7 +51,7 @@ export type HudCharacter = HudSprite & {
   name: string
   /** 몸 색 글자(깜빡일 때 눈을 덮는 색) */
   body: string
-  /** 다른 크기 그림(선택). 없는 크기를 고르면 기본 그림을 쓴다 */
+  /** 다른 크기 그림(선택). 없으면 크게는 기본 그림을 두 배로, 작게는 기본 그림을 쓴다 */
   sizes?: Readonly<Partial<Record<'small' | 'large', HudSprite>>>
   /** 글자 → 색(#rrggbb) */
   colors: Readonly<Record<string, string>>
