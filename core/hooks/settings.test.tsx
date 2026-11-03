@@ -123,3 +123,11 @@ test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는
   expect((tab as { props?: { hotkey?: string } } | undefined)?.props?.hotkey).toBe('3')
   await ui.unmount()
 })
+
+test('HUD 패널의 설정 버튼을 누르면 설정 패널이 열린다', async ($, on) => {
+  const { opened } = await start($, on)
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, requestId: 'cozy-hud', props: { ...SETTINGS_PANE.props, title: 'HUD' }, surface: 'terminal' })
+  await ui.press({ key: 'open-settings' })
+  expect(opened).toContain('cozy-hud-settings')
+  await ui.unmount()
+})
