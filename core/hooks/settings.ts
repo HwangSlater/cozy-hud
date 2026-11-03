@@ -1,8 +1,21 @@
-// 사용자가 고른 값과 /hud 명령. 명령은 고른 값을 바꾸고, 바뀐 값은 $.store 에 남는다.
-import type { HudCard, HudCharacter, HudLayout, HudSettings } from '../types'
+// 사용자가 고른 값. 설정 패널과 /hud 명령이 바꾸고, 바뀐 값은 $.store 에 남는다.
+import type { HudCard, HudCharacter, HudLayout, HudOption, HudSettings, HudSize, HudSleep, HudSpeed, HudToolTalk } from '../types'
 
-export const DEFAULTS: HudSettings = { layout: 'both', character: 'claude', theme: 'auto', order: [], hidden: [] }
-const LAYOUTS: Record<HudLayout, string> = { pane: '패널만', band: '입력창 위 줄만', both: '패널 + 입력창 위 줄' }
+export const DEFAULTS: HudSettings = {
+  layout: 'both', character: 'claude', theme: 'auto', order: [], hidden: [],
+  size: { pane: 'large', band: 'medium' },
+  motion: { speed: 'normal', sleep: '15' },
+  speech: { tools: 'file', react: 'on' },
+  cards: {},
+}
+
+/** 고를 수 있는 값과 화면에 보일 이름. 설정 패널의 목록도 여기서 만든다 */
+export const LAYOUTS: Record<HudLayout, string> = { both: '패널 + 입력창 위', pane: '패널만', band: '입력창 위만' }
+export const SIZES: Record<HudSize, string> = { large: '크게', medium: '보통', small: '작게' }
+export const SPEEDS: Record<HudSpeed, string> = { fast: '빠르게', normal: '보통', slow: '느리게', off: '멈춤' }
+export const SLEEPS: Record<HudSleep, string> = { '5': '5분', '15': '15분', '30': '30분', never: '안 잠듦' }
+export const TOOL_TALK: Record<HudToolTalk, string> = { file: '파일 이름까지', verb: '하는 일만', off: '말 안 함' }
+export const REACT: Record<'on' | 'off', string> = { on: '켜기', off: '끄기' }
 
 export type ThemeSpec = { name: string; tones: Record<string, string>; sweat: string }
 export type Catalog = {
@@ -11,51 +24,73 @@ export type Catalog = {
   cards: Readonly<Record<string, HudCard>>
 }
 
-/** 저장해 둔 값을 기본값과 합친다(모르는 칸·잘못된 값은 버림) */
+const pick = <T extends string>(table: Record<T, string>, v: unknown, fallback: T): T =>
+  typeof v === 'string' && v in table ? (v as T) : fallback
+
+/** 저장해 둔 값을 기본값과 합친다(모르는 칸·잘못된 값은 버림). 예전 형식도 읽는다 */
 export function fromStore(raw: unknown): HudSettings {
-  const v = (raw ?? {}) as Partial<HudSettings>
+  const v = (raw ?? {}) as Record<string, unknown>
+  const obj = (x: unknown) => (x && typeof x === 'object' ? (x as Record<string, unknown>) : {})
   const list = (x: unknown) => (Array.isArray(x) ? x.filter((s): s is string => typeof s === 'string') : [])
+  const size = obj(v.size), motion = obj(v.motion), speech = obj(v.speech)
+  const cards: Record<string, Record<string, string>> = {}
+  for (const [id, values] of Object.entries(obj(v.cards))) {
+    cards[id] = Object.fromEntries(Object.entries(obj(values)).filter((e): e is [string, string] => typeof e[1] === 'string'))
+  }
   return {
-    layout: v.layout && v.layout in LAYOUTS ? v.layout : DEFAULTS.layout,
+    layout: pick(LAYOUTS, v.layout, DEFAULTS.layout),
     character: typeof v.character === 'string' ? v.character : DEFAULTS.character,
     theme: typeof v.theme === 'string' ? v.theme : DEFAULTS.theme,
     order: list(v.order),
     hidden: list(v.hidden),
+    size: { pane: pick(SIZES, size.pane, DEFAULTS.size.pane), band: pick(SIZES, size.band, DEFAULTS.size.band) },
+    motion: { speed: pick(SPEEDS, motion.speed, DEFAULTS.motion.speed), sleep: pick(SLEEPS, motion.sleep, DEFAULTS.motion.sleep) },
+    speech: { tools: pick(TOOL_TALK, speech.tools, DEFAULTS.speech.tools), react: pick(REACT, speech.react, DEFAULTS.speech.react) },
+    cards,
   }
 }
 
-/** 카드를 고른 순서대로, 숨긴 것은 빼고 */
-export function arrange(cards: Readonly<Record<string, HudCard>>, s: HudSettings): HudCard[] {
-  const visible = Object.values(cards).filter(c => !s.hidden.includes(c.id))
+/** 카드를 고른 순서대로(숨긴 것도 포함). 화면에 그릴 때는 visible 로 거른다 */
+export function ordered(cards: Readonly<Record<string, HudCard>>, s: HudSettings): HudCard[] {
   const rank = (id: string) => {
     const i = s.order.indexOf(id)
     return i < 0 ? s.order.length : i
   }
-  return visible.sort((a, b) => rank(a.id) - rank(b.id) || a.id.localeCompare(b.id))
+  return Object.values(cards).sort((a, b) => rank(a.id) - rank(b.id) || a.id.localeCompare(b.id))
 }
+export const arrange = (cards: Readonly<Record<string, HudCard>>, s: HudSettings) =>
+  ordered(cards, s).filter(c => !s.hidden.includes(c.id))
+
+/** 카드 하나를 위(-1)나 아래(+1)로. 지금 보이는 순서를 그대로 order 에 적는다 */
+export function moveCard(cards: Readonly<Record<string, HudCard>>, s: HudSettings, id: string, by: -1 | 1): HudSettings {
+  const ids = ordered(cards, s).map(c => c.id)
+  const i = ids.indexOf(id), j = i + by
+  if (i < 0 || j < 0 || j >= ids.length) return s
+  ;[ids[i], ids[j]] = [ids[j] as string, ids[i] as string]
+  return { ...s, order: ids }
+}
+
+export const toggleHidden = (s: HudSettings, id: string): HudSettings =>
+  ({ ...s, hidden: s.hidden.includes(id) ? s.hidden.filter(x => x !== id) : [...s.hidden, id] })
+
+/** 카드 설정 값: 부품이 정한 기본값 위에 사용자가 고른 값 */
+export function optionValues(card: HudCard, s: HudSettings): Record<string, string> {
+  const chosen = s.cards[card.id] ?? {}
+  return Object.fromEntries((card.options ?? []).map((o: HudOption) => [o.key, chosen[o.key] ?? o.value]))
+}
+
+export const setOption = (s: HudSettings, card: string, key: string, value: string): HudSettings =>
+  ({ ...s, cards: { ...s.cards, [card]: { ...(s.cards[card] ?? {}), [key]: value } } })
 
 export const HELP = [
-  '/hud                     패널 열기 · 지금 설정 보기',
+  '/hud                         설정 패널 열기',
   '/hud layout pane|band|both   어디에 보일지',
   '/hud character <이름>|none   캐릭터 바꾸기(이름 없이 쓰면 목록)',
-  '/hud theme <이름>         테마 바꾸기(이름 없이 쓰면 목록)',
-  '/hud order a,b,c          카드 순서',
-  '/hud hide <카드> · /hud show <카드>',
-  '/hud reset                처음 설정으로',
+  '/hud theme <이름>            테마 바꾸기(이름 없이 쓰면 목록)',
+  '/hud reset                   처음 설정으로',
 ].join('\n')
 
-function summary(s: HudSettings, c: Catalog): string {
-  const ch = s.character === 'none' ? '없음' : c.characters[s.character]?.name ?? `${s.character}(설치 안 됨)`
-  const cards = Object.keys(c.cards)
-  return [
-    `배치: ${LAYOUTS[s.layout]} · 캐릭터: ${ch} · 테마: ${c.themes[s.theme]?.name ?? s.theme}`,
-    `카드: ${cards.length ? cards.map(id => (s.hidden.includes(id) ? `${id}(숨김)` : id)).join(', ') : '없음 — 부품 mod 를 설치하세요'}`,
-    '',
-    HELP,
-  ].join('\n')
-}
-
-/** 명령 하나를 적용한 새 설정과 보여 줄 글. 설정이 안 바뀌면 next 는 null */
+/** 명령 하나를 적용한 새 설정과 보여 줄 글. 설정이 안 바뀌면 next 는 null. 빈 명령은 패널이 맡는다 */
 export function runCommand(args: string, s: HudSettings, c: Catalog): { next: HudSettings | null; text: string } {
   // 안내 문구의 [ ] < > 를 그대로 따라 쳐도 알아듣게 벗긴다
   const words = args.replace(/[[\]<>]/g, ' ').trim().split(/\s+/).filter(Boolean)
@@ -65,8 +100,6 @@ export function runCommand(args: string, s: HudSettings, c: Catalog): { next: Hu
   const set = (next: HudSettings, text: string) => ({ next, text })
 
   switch (verb) {
-    case '':
-      return keep(summary(s, c))
     case 'layout':
       return arg in LAYOUTS
         ? set({ ...s, layout: arg as HudLayout }, `배치를 「${LAYOUTS[arg as HudLayout]}」(으)로 바꿨어요.`)
@@ -82,18 +115,6 @@ export function runCommand(args: string, s: HudSettings, c: Catalog): { next: Hu
       if (!arg) return keep(names.join('\n'))
       if (!c.themes[arg]) return keep(`「${arg}」 테마가 없어요.\n${names.join('\n')}`)
       return set({ ...s, theme: arg }, `테마를 「${c.themes[arg]?.name}」(으)로 바꿨어요.`)
-    }
-    case 'order': {
-      const order = arg.split(/[,\s]+/).filter(Boolean)
-      return order.length ? set({ ...s, order }, `카드 순서: ${order.join(' → ')}`) : keep('예: /hud order tokens,context,checklist')
-    }
-    case 'hide':
-    case 'show': {
-      if (!arg) return keep(`예: /hud ${verb} tokens`)
-      const hidden = s.hidden.filter(id => id !== arg)
-      return verb === 'hide'
-        ? set({ ...s, hidden: [...hidden, arg] }, `「${arg}」 카드를 숨겼어요. 다시 보려면 /hud show ${arg}`)
-        : set({ ...s, hidden }, `「${arg}」 카드를 다시 보여요.`)
     }
     case 'reset':
       return set(DEFAULTS, '처음 설정으로 되돌렸어요.')

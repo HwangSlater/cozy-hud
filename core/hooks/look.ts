@@ -1,5 +1,5 @@
 // 캐릭터 픽셀 → 터미널 칸. 한 칸 = 위아래 픽셀 두 개(▀ 글자색 = 위, 배경색 = 아래).
-import type { HudCharacter, HudMood } from '../types'
+import type { HudCharacter, HudMood, HudSize, HudSprite } from '../types'
 
 /** 투명 칸: 터미널 기본색 */
 const DEFAULT = 0x01000000
@@ -9,15 +9,22 @@ const SPACE = 0x20
 /** 땀방울은 캐릭터 색과 상관없이 같은 글자를 쓴다 */
 const SWEAT = 'B'
 
+/** 고른 크기의 그림. 그 크기가 없으면 기본(보통) 그림 */
+export function spriteOf(ch: HudCharacter, size: HudSize): HudSprite {
+  return (size === 'medium' ? undefined : ch.sizes?.[size]) ?? ch
+}
+
 /** 기분과 프레임 번호에 따라 이번에 그릴 픽셀 줄 */
-export function frameRows(ch: HudCharacter, mood: HudMood, frame: number, sweat: string): string[] {
-  let rows = [...ch.rows]
+export function frameRows(ch: HudCharacter, size: HudSize, mood: HudMood, frame: number): string[] {
+  const sp = spriteOf(ch, size)
+  let rows = [...sp.rows]
   const isShut = mood === 'sleep' || frame % 20 === 0
   if (mood === 'work' && frame % 2 === 1) {
-    for (const [i, row] of Object.entries(ch.alt)) rows[Number(i)] = row
+    for (const [i, row] of Object.entries(sp.alt)) rows[Number(i)] = row
   }
+  // 눈 감기: 눈동자(K)와 반짝이(H)를 몸 색으로
   if (isShut) {
-    rows = rows.map((row, i) => (ch.eyes.includes(i) ? row.replaceAll('K', ch.body) : row))
+    rows = rows.map((row, i) => (sp.eyes.includes(i) ? row.replace(/[KH]/g, ch.body) : row))
   }
   rows = rows.map(row => row + '..')
   const empty = '.'.repeat(rows[0]?.length ?? 0)
@@ -25,16 +32,9 @@ export function frameRows(ch: HudCharacter, mood: HudMood, frame: number, sweat:
   if (mood === 'sweat') {
     const y = 1 + (frame % 3)
     const line = canvas[y] ?? empty
-    canvas[y] = line.slice(0, -1) + sweat
+    canvas[y] = line.slice(0, -1) + SWEAT
   }
   return canvas
-}
-
-export const sweatMark = SWEAT
-
-/** 캐릭터가 차지하는 칸: 폭 · 줄 수 */
-export function spriteSize(ch: HudCharacter): { columns: number; rows: number } {
-  return { columns: (ch.rows[0]?.length ?? 0) + 2, rows: (ch.rows.length + 2) / 2 }
 }
 
 export type PixelColor = string | null

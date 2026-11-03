@@ -1,0 +1,4 @@
+# 엔진이 mod 를 불러올 때 만들어 주는 편집기용 파일(.claude-plugin/types 를 가리킴)
+core/tsconfig.json
+packs/*/tsconfig.json
+widgets/*/tsconfig.json
