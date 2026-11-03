@@ -241,30 +241,34 @@
  {
   "id": "puppy",
   "name": "강아지",
-  "body": "D",
+  "body": "T",
   "eyes": [
-   2
+   4,
+   5
   ],
   "rows": [
-   "..DDDDDDDD..",
-   ".EDDDDDDDDE.",
-   ".EDKDDDDKDE.",
-   ".EDDDWWDDDE.",
-   "..DDWKKWDD..",
-   "..DDDDDDDD.D",
-   "..DDDDDDDDD.",
-   "..D.D..D.D.."
+   "....TTTTTTTTTT....",
+   "..TTTTTTTTTTTTTT..",
+   ".ETTTTTTTTTTTTTTE.",
+   "EETTTTTTTTTTTTTTEE",
+   "EETTTHKTTTTHKTTTEE",
+   "EETTTKKTTTTKKTTTEE",
+   ".EPPTTTWKKWTTTPPE.",
+   "..TTTTTWWWWTTTTT..",
+   "...TTTTTTTTTTTT.T.",
+   "....TT......TT...."
   ],
   "alt": {
-   "5": "..DDDDDDDD..",
-   "6": "..DDDDDDDDDD",
-   "7": "...D.D..D.D."
+   "8": "...TTTTTTTTTTTT..T",
+   "9": ".....TT....TT....."
   },
   "colors": {
-   "D": "#d9a86c",
-   "E": "#8a5a36",
-   "K": "#2a1f18",
-   "W": "#f4ead9"
+   "T": "#d9a066",
+   "E": "#9c6b3f",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "P": "#f2a0a0",
+   "W": "#f7f2ea"
   },
   "accent": "#d9a86c"
  },
