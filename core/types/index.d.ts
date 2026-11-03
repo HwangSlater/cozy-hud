@@ -99,7 +99,8 @@ export type HudSettings = {
 /** 설정 패널에서 보고 있는 탭(저장하지 않음) */
 export type HudTab = 'character' | 'layout' | 'theme' | 'cards'
 /** canUndo: 「처음 설정으로」 직후 되돌리기 단추를 보일지 */
-export type HudView = { tab: HudTab; canUndo: boolean }
+/** isFolded: HUD 패널 아래 설정을 접었는지. 사람이 누르기 전에는 없고, 그동안은 패널 크기로 정한다 */
+export type HudView = { tab: HudTab; canUndo: boolean; isFolded?: boolean }
 
 export type HudMood = 'idle' | 'work' | 'happy' | 'sweat' | 'sleep'
 export type HudLive = {

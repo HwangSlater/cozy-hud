@@ -125,9 +125,23 @@ test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는
   await ui.unmount()
 })
 
-test('HUD 패널에는 설정이 같이 그려진다', async ($, on) => {
+const HUD_PANE = { ...SETTINGS_PANE, requestId: 'cozy-hud', props: { ...SETTINGS_PANE.props, title: 'HUD' }, surface: 'terminal' } as const
+
+test('HUD 패널에는 설정이 같이 그려지고, 접고 펼 수 있다', async ($, on) => {
   await start($, on)
-  const ui = await $.ui.mount({ ...SETTINGS_PANE, requestId: 'cozy-hud', props: { ...SETTINGS_PANE.props, title: 'HUD' }, surface: 'terminal' })
+  const ui = await $.ui.mount(HUD_PANE)
   expect(await ui.find({ type: 'Button', key: 'tab-theme' })).toBeDefined()
+  await ui.press({ key: 'fold-settings' })
+  expect(await ui.find({ type: 'Button', key: 'tab-theme' })).toBeUndefined()
+  await ui.press({ key: 'fold-settings' })
+  expect(await ui.find({ type: 'Button', key: 'tab-theme' })).toBeDefined()
+  await ui.unmount()
+})
+
+test('HUD 패널이 낮으면 설정이 접혀 있다', async ($, on) => {
+  await start($, on)
+  const ui = await $.ui.mount({ ...HUD_PANE, props: { ...HUD_PANE.props, scroll: { offset: 0, bodyRows: 12 } } })
+  expect(await ui.find({ type: 'Button', key: 'fold-settings' })).toBeDefined()
+  expect(await ui.find({ type: 'Button', key: 'tab-theme' })).toBeUndefined()
   await ui.unmount()
 })

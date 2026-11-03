@@ -23,6 +23,8 @@ const REACT_MS = 2500
 /** 컨텍스트가 이만큼 차면 땀 */
 const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
+/** HUD 패널이 이보다 낮거나 좁으면 아래 설정을 접어 둔다(사람이 펼치거나 접으면 그쪽을 따른다) */
+const FOLD_BELOW = { rows: 24, columns: 48 }
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
 
@@ -207,15 +209,23 @@ export const register: Register = on => {
   // HUD 패널: 위에 HUD, 아래에 설정을 늘 같이 둔다(엔진은 패널을 한 번에 하나만 보여 줘서 합쳤다)
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const el = $.ui.resolve(e)
-    const { Box } = el
+    const { Box, Button, Text } = el
     const s = await read($, settings)
     const tones = tonesFor(s, await currentCharacter($))
+    const isSmall = e.props.scroll.bodyRows < FOLD_BELOW.rows || e.props.bodyColumns < FOLD_BELOW.columns
+    const isFolded = (await read($, view)).isFolded ?? isSmall
+    const fill = Math.max(1, e.props.bodyColumns - 8)
     return (
       <Box flexDirection="column">
         {await drawHud($, el, e.surface, e.props.bodyColumns, PANE)}
         <Box marginTop={1} flexDirection="column">
-          {drawRule(el, { id: 'settings', title: '설정', lines: [] }, e.props.bodyColumns, tones)}
-          {await drawSettings($, el, tones, e.surface, e.props.isFocused, PANE)}
+          <Box flexDirection="row">
+            <Button key="fold-settings" plain onPress={() => void update($, view, v => ({ ...v, isFolded: !isFolded }))}>
+              <Text bold color={tones.strong}>{isFolded ? '▸ 설정' : '▾ 설정'}</Text>
+            </Button>
+            <Text color={tones.line}> {'─'.repeat(fill)}</Text>
+          </Box>
+          {isFolded ? null : await drawSettings($, el, tones, e.surface, e.props.isFocused, PANE)}
         </Box>
       </Box>
     )
