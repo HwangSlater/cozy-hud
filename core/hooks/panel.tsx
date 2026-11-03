@@ -3,7 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudOption, HudSettings, HudTab, HudView } from '../types'
-import type { Tones } from './draw'
+import { cellWidth, type Tones } from './draw'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
@@ -62,7 +62,8 @@ const pickRow = (el: El, key: string, label: string, table: Record<string, strin
 /** 고를 수 있는 캐릭터 이름(마지막은 「없음」) */
 const characterNames = (list: readonly HudCharacter[]) => [...list.map(c => ({ value: c.id, label: c.name })), { value: 'none', label: '없음' }]
 
-export type CharacterNav = { label: string; count: string; prev: () => void; next: () => void }
+/** nameColumns: 가장 긴 이름의 칸 수(이름 칸을 이만큼 잡아 ◀ ▶ 자리가 넘겨도 그대로) */
+export type CharacterNav = { label: string; count: string; nameColumns: number; prev: () => void; next: () => void }
 
 /** 미리보기에서 ◀ ▶ 로 캐릭터를 하나씩 넘길 때 쓰는 값 */
 export async function characterNav($: $): Promise<CharacterNav> {
@@ -73,7 +74,9 @@ export async function characterNav($: $): Promise<CharacterNav> {
     const id = names[(at + by + names.length) % names.length]?.value ?? 'none'
     void saveSettings($, x => ({ ...x, character: id }))
   }
-  return { label: names[at]?.label ?? '', count: `${at + 1} / ${names.length}`, prev: () => go(-1), next: () => go(1) }
+  const count = `${at + 1} / ${names.length}`
+  const nameColumns = Math.max(cellWidth(count), ...names.map(n => cellWidth(n.label)))
+  return { label: names[at]?.label ?? '', count, nameColumns, prev: () => go(-1), next: () => go(1) }
 }
 
 async function characterTab($: $, el: El, s: HudSettings, tones: Tones) {

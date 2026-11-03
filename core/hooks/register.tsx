@@ -25,8 +25,6 @@ const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
 /** 미리보기 상자의 테두리 두 칸 + 안쪽 여백 두 칸 */
 const PREVIEW_INSET = 4
-/** 넘기기 줄의 이름 칸 너비: 이름 길이가 달라도 ◀ ▶ 자리가 그대로 */
-const NAV_NAME_COLUMNS = 10
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
 
@@ -90,12 +88,12 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
       ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
       {nav ? (
         <Box key="ch-nav" flexDirection="row" alignItems="center" columnGap={1} marginTop={pet ? 0 : 1}>
-          <Button key="ch-prev" label="이전 캐릭터" onPress={nav.prev}>◀</Button>
-          <Box flexDirection="column" alignItems="center" width={NAV_NAME_COLUMNS}>
+          <Button key="ch-prev" label="이전 캐릭터" plain onPress={nav.prev}>[◀]</Button>
+          <Box flexDirection="column" alignItems="center" width={nav.nameColumns}>
             <Text bold color={tones.accent} wrap="truncate-end">{nav.label}</Text>
             <Text color={tones.dim}>{nav.count}</Text>
           </Box>
-          <Button key="ch-next" label="다음 캐릭터" onPress={nav.next}>▶</Button>
+          <Button key="ch-next" label="다음 캐릭터" plain onPress={nav.next}>[▶]</Button>
         </Box>
       ) : null}
       {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
