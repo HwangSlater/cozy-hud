@@ -65,7 +65,7 @@ function toolTalk(tool: string, input: { file_path?: string; pattern?: string; c
 
 /** HUD 패널의 내용(캐릭터·말풍선·카드). HUD 패널과 설정 패널의 미리보기가 같이 쓴다 */
 async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string, columns: number, site: string) {
-  const { Box, Text } = el
+  const { Box, Text, Button } = el
   const s = await read($, settings)
   const ch = await currentCharacter($)
   const tones = tonesFor(s, ch)
@@ -86,6 +86,11 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
       ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
       {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
       {shown.map(card => drawCard(el, card, columns, tones))}
+      {site === PANE ? (
+        <Box marginTop={1}>
+          <Button key="open-settings" hotkey="s" onPress={() => void openSettings($)}>설정</Button>
+        </Box>
+      ) : null}
     </Box>
   )
 }
@@ -129,11 +134,7 @@ export const register: Register = on => {
     // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
     await addCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
     await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
-    if (saved.layout !== 'band') {
-      void $.ui.open({ id: PANE, title: 'HUD' })
-      // 설정은 HUD 패널 안에 있으니, 예전에 따로 띄운 설정 패널이 남아 있으면 닫는다
-      void $.ui.close({ id: SETTINGS_PANE })
-    }
+    if (saved.layout !== 'band') void $.ui.open({ id: PANE, title: 'HUD' })
     const answer = await next(e)
     await $.hud.ready({})
     return answer
@@ -143,7 +144,7 @@ export const register: Register = on => {
   on('command.run', { command: 'hud' }, async ($, e) => {
     if (!e.args.replace(/[[\]<>]/g, '').trim()) {
       await openSettings($)
-      return { text: 'HUD 설정을 열었어요.' }
+      return { text: 'HUD 설정 패널을 열었어요.' }
     }
     const s = await read($, settings)
     const { next, text } = runCommand(e.args, s, { themes: mem.themes, characters: await read($, characters), cards: await read($, cards) })
@@ -193,7 +194,7 @@ export const register: Register = on => {
     if (!isPreview) forgetSite(SETTINGS_PANE)
     return (
       <Box flexDirection="column">
-        {await drawSettings($, el, tones, e.surface, e.props.isFocused, SETTINGS_PANE)}
+        {await drawSettings($, el, tones, e.surface, e.props.isFocused)}
         <Box marginTop={1} flexDirection="column">
           {drawRule(el, { id: 'preview', title: '미리보기', lines: [] }, e.props.bodyColumns, tones)}
           {isPreview
@@ -204,22 +205,8 @@ export const register: Register = on => {
     )
   })
 
-  // HUD 패널: 위에 HUD, 아래에 설정을 늘 같이 둔다(엔진은 패널을 한 번에 하나만 보여 줘서 합쳤다)
-  on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const el = $.ui.resolve(e)
-    const { Box } = el
-    const s = await read($, settings)
-    const tones = tonesFor(s, await currentCharacter($))
-    return (
-      <Box flexDirection="column">
-        {await drawHud($, el, e.surface, e.props.bodyColumns, PANE)}
-        <Box marginTop={1} flexDirection="column">
-          {drawRule(el, { id: 'settings', title: '설정', lines: [] }, e.props.bodyColumns, tones)}
-          {await drawSettings($, el, tones, e.surface, e.props.isFocused, PANE)}
-        </Box>
-      </Box>
-    )
-  })
+  on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) =>
+    drawHud($, $.ui.resolve(e), e.surface, e.props.bodyColumns, PANE))
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const s = await read($, settings)

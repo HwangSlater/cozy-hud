@@ -106,12 +106,11 @@ test('목록이 없는 화면(모바일)에서는 버튼 줄로 고른다', asyn
   await ui.unmount()
 })
 
-test('/hud 를 이름 없이 치면 설정이 있는 HUD 패널을 연다', async ($, on) => {
+test('/hud 를 이름 없이 치면 설정 패널을 연다', async ($, on) => {
   const { opened } = await start($, on)
-  opened.length = 0
   const r = await $.command.run({ command: 'hud', args: '' } as Parameters<typeof $.command.run>[0])
-  expect(opened).toEqual(['cozy-hud'])
-  expect(r.text).toContain('설정')
+  expect(opened).toContain('cozy-hud-settings')
+  expect(r.text).toContain('설정 패널')
 })
 
 test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는 숫자 단축키가 있다', async ($, on) => {
@@ -125,9 +124,10 @@ test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는
   await ui.unmount()
 })
 
-test('HUD 패널에는 설정이 같이 그려진다', async ($, on) => {
-  await start($, on)
+test('HUD 패널의 설정 버튼을 누르면 설정 패널이 열린다', async ($, on) => {
+  const { opened } = await start($, on)
   const ui = await $.ui.mount({ ...SETTINGS_PANE, requestId: 'cozy-hud', props: { ...SETTINGS_PANE.props, title: 'HUD' }, surface: 'terminal' })
-  expect(await ui.find({ type: 'Button', key: 'tab-theme' })).toBeDefined()
+  await ui.press({ key: 'open-settings' })
+  expect(opened).toContain('cozy-hud-settings')
   await ui.unmount()
 })
