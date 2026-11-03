@@ -55,6 +55,14 @@ export async function setMood($: $, mood: HudMood, speech: string) {
   syncTimer($)
 }
 
+/** 세션 시작·다시 불러오기: 목록을 코어 캐릭터만으로 새로 시작한다(뺀 캐릭터·예전 그림이 남지 않게). 팩은 hud.ready 를 듣고 다시 보낸다 */
+export async function resetCharacters($: $, list: readonly HudCharacter[]) {
+  const next = Object.fromEntries(list.map(ch => [ch.id, ch]))
+  await update($, characters, () => next)
+  mem.characters = next
+  forgetArt()
+}
+
 export async function addCharacters($: $, list: readonly HudCharacter[]) {
   const next = { ...(await read($, characters)), ...Object.fromEntries(list.map(ch => [ch.id, ch])) }
   await update($, characters, () => next)

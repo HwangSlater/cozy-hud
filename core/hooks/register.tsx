@@ -8,7 +8,7 @@ import { drawnAt, forgetSite, petArt } from './motion'
 import { SETTINGS_TITLE, drawSettings, openSettings } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
 import {
-  PANE, SETTINGS_PANE, addCharacters, loadStored, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
+  PANE, SETTINGS_PANE, addCharacters, loadStored, resetCharacters, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
 } from './state'
 
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
@@ -134,7 +134,7 @@ export const register: Register = on => {
       if (saved.layout !== 'band') await $.ui.open({ id: PANE, title: 'HUD' })
     })()
     // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
-    await addCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
+    await resetCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
     await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
     const answer = await next(e)
     await $.hud.ready({})
