@@ -126,5 +126,7 @@ test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는
 
 test('세션이 시작되면 HUD 와 HUD 설정 탭을 같이 연다', async ($, on) => {
   const { opened } = await start($, on)
+  // 탭 열기는 세션 시작을 붙잡지 않으려고 기다리지 않아서, 끝날 때까지 몇 번 돌린다
+  for (let i = 0; i < 20 && opened.length < 2; i++) await Promise.resolve()
   expect(opened).toEqual(['cozy-hud-settings', 'cozy-hud'])
 })

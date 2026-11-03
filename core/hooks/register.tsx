@@ -126,14 +126,14 @@ export const register: Register = on => {
     const saved = fromStore(await loadStored($))
     await update($, settings, () => saved)
     await syncFromState($)
-    // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
-    await addCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
-    await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
     // HUD 와 HUD 설정은 늘 탭 두 개로 같이 둔다(설정을 먼저 열어 HUD 가 앞에 오게)
     void (async () => {
       await $.ui.open({ id: SETTINGS_PANE, title: SETTINGS_TITLE })
       if (saved.layout !== 'band') await $.ui.open({ id: PANE, title: 'HUD' })
     })()
+    // 기본 캐릭터는 코어에 들어 있다. 다른 팩(개인 팩 등)은 ready 를 듣고 다시 보낸다
+    await addCharacters($, JSON.parse(await $.fs.read(`${$.plugin.root}/data/characters.json`)) as HudCharacter[])
+    await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
     const answer = await next(e)
     await $.hud.ready({})
     return answer
