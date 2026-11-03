@@ -372,31 +372,38 @@
  {
   "id": "hamster",
   "name": "햄스터",
-  "body": "H",
+  "body": "Q",
   "eyes": [
-   2
+   4,
+   5
   ],
   "rows": [
-   "..HH....HH..",
-   ".HHHHHHHHHH.",
-   ".HKHHHHHHKH.",
-   "PHHWWKKWWHHP",
-   ".HWWWWWWWWH.",
-   ".HWWWWWWWWH.",
-   "..HHHHHHHH..",
-   "...P....P..."
+   "...EE........EE...",
+   "..EIEQQQQQQQQEIE..",
+   "..QQQQQQQQQQQQQQ..",
+   ".QQQQQQQQQQQQQQQQ.",
+   ".QQQQHKQQQQHKQQQQ.",
+   ".QWWQKKQQQQKKQWWQ.",
+   "QWFPPWWWNNWWWPPFWQ",
+   "QWWWWWWWWWWWWWWWWQ",
+   ".QWWWWWWWWWWWWWWQ.",
+   "...II........II..."
   ],
   "alt": {
-   "4": "HHWWWWWWWWHH",
-   "7": "..P......P.."
+   "9": "....II......II...."
   },
   "colors": {
-   "H": "#f0b878",
-   "K": "#2a1f18",
-   "P": "#f2a0a8",
-   "W": "#fbf1e2"
+   "E": "#6e5444",
+   "I": "#f2a0b4",
+   "Q": "#d98a2b",
+   "H": "#ffffff",
+   "K": "#1a1714",
+   "W": "#fdf1dc",
+   "F": "#5a4636",
+   "P": "#f2a0a0",
+   "N": "#e87d8f"
   },
-  "accent": "#f0b878"
+  "accent": "#e0a050"
  },
  {
   "id": "mochi",
