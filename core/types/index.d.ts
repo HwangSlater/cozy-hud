@@ -45,7 +45,7 @@ export type HudSprite = {
 }
 export type HudSize = 'small' | 'medium' | 'large'
 
-/** 캐릭터 픽셀 그림. 글자 하나 = 픽셀 하나, '.' = 투명. 두 줄이 터미널 한 줄. 기본 그림이 「보통」 크기 */
+/** 캐릭터 픽셀 그림. 글자 하나 = 픽셀 하나, '.' = 투명, '~' 는 땀방울로 쓰니 색 글자로 쓰지 않는다. 두 줄이 터미널 한 줄. 기본 그림이 「보통」 크기 */
 export type HudCharacter = HudSprite & {
   id: string
   name: string
@@ -99,7 +99,8 @@ export type HudSettings = {
 /** 설정 패널에서 보고 있는 탭(저장하지 않음) */
 export type HudTab = 'character' | 'layout' | 'theme' | 'cards'
 /** canUndo: 「처음 설정으로」 직후 되돌리기 단추를 보일지 */
-export type HudView = { tab: HudTab; canUndo: boolean }
+/** picking: 미리보기에서 캐릭터 이름 격자를 펼쳤는지(예전 값에는 없음 = 닫힘) */
+export type HudView = { tab: HudTab; canUndo: boolean; picking?: boolean }
 
 export type HudMood = 'idle' | 'work' | 'happy' | 'sweat' | 'sleep'
 export type HudLive = {

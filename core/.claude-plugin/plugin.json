@@ -1,7 +1,7 @@
 {
   "name": "cozy-hud",
   "version": "0.1.0",
-  "description": "cozy-hud 코어: 부품 카드와 캐릭터(15종 포함)를 패널·입력창 위 줄에 그린다. /hud 설정 패널에서 캐릭터·크기·움직임·배치·테마·카드를 고른다.",
+  "description": "cozy-hud 코어: 부품 카드와 캐릭터(14종 포함)를 패널·입력창 위 줄에 그린다. /hud 설정 패널에서 캐릭터·크기·움직임·배치·테마·카드를 고른다.",
   "author": { "name": "HwangSlater" },
   "license": "MIT",
   "types": "./types/index.d.ts"

@@ -3,12 +3,12 @@
   "owner": {
     "name": "HwangSlater"
   },
-  "description": "Claude Code 터미널에 캐릭터와 계기판을 붙이는 mod 모음. 코어(캐릭터 15종 포함) 위에 부품을 골라 끼운다.",
+  "description": "Claude Code 터미널에 캐릭터와 계기판을 붙이는 mod 모음. 코어(캐릭터 14종 포함) 위에 부품을 골라 끼운다.",
   "plugins": [
     {
       "name": "cozy-hud",
       "source": "./core",
-      "description": "코어(필수): 패널·입력창 위 줄, 설정 패널(/hud), 캐릭터 15종"
+      "description": "코어(필수): 패널·입력창 위 줄, 설정 패널(/hud), 캐릭터 14종"
     },
     {
       "name": "cozy-hud-tokens",

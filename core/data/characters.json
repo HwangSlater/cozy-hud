@@ -195,7 +195,7 @@
   },
   "colors": {
    "F": "#e8823a",
-   "W": "#f7f2ea",
+   "W": "#eeeeee",
    "H": "#ffffff",
    "K": "#1a1714",
    "P": "#f2a0a0",
@@ -229,7 +229,7 @@
   },
   "colors": {
    "S": "#dfe7ec",
-   "W": "#f7f2ea",
+   "W": "#eeeeee",
    "H": "#ffffff",
    "K": "#1a1714",
    "P": "#f2a0a0",
@@ -267,7 +267,7 @@
    "H": "#ffffff",
    "K": "#1a1714",
    "P": "#f2a0a0",
-   "W": "#f7f2ea"
+   "W": "#eeeeee"
   },
   "accent": "#d9a86c"
  },
@@ -464,7 +464,7 @@
   },
   "colors": {
    "S": "#cfd6dc",
-   "A": "#fbf3e8",
+   "A": "#ffeedd",
    "H": "#ffffff",
    "K": "#1a1714",
    "P": "#f2a0a0",

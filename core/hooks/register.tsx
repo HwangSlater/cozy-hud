@@ -5,7 +5,7 @@ import type { Register } from 'claude-code'
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
 import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
-import { SETTINGS_TITLE, characterNav, drawSettings, openSettings, type CharacterNav } from './panel'
+import { SETTINGS_TITLE, characterNav, drawCharacterGrid, drawSettings, openSettings, type CharacterNav } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
 import {
   PANE, SETTINGS_PANE, addCharacters, loadStored, resetCharacters, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
@@ -25,6 +25,8 @@ const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
 /** 미리보기 상자의 테두리 두 칸 + 안쪽 여백 두 칸 */
 const PREVIEW_INSET = 4
+/** 캐릭터 이름 버튼의 「[ 」·「 ▾ ]」가 더 차지하는 칸 */
+const NAME_BUTTON_EXTRA = 6
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
 
@@ -72,7 +74,9 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
   const ch = await currentCharacter($)
   const tones = tonesFor(s, ch)
   const shown = arrange(await read($, cards), s)
-  const v = await read($, live)
+  // 설정 미리보기는 지금 말풍선 대신 고른 말풍선 설정의 예시를 보여 준다. 일하는 동안 도구마다 바뀌는 말풍선을
+  // 읽으면 설정 패널 전체가 계속 다시 그려져, 그 사이에 누른 클릭을 놓친다
+  const speech = nav ? toolTalk('Read', { file_path: 'register.tsx' }, s.speech.tools) : (await read($, live)).speech
   const pet = petArt(s.size.pane)
   if (pet) drawnAt(site, pet.encoded)
   else forgetSite(site)
@@ -81,24 +85,27 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
     <Box key="stage" flexDirection="column" alignItems="center">
       {pet ? drawPet(el, surface === 'terminal', pet.cells, pet.encoded) : <Text color={tones.dim}>(캐릭터 없음)</Text>}
       <Box key="ch-nav" flexDirection="row" columnGap={1}>
-        {/* ◀ ▶ 는 터미널·글꼴에 따라 한 칸이 되기도 두 칸이 되기도 해 줄이 흔들려서, 늘 한 칸인 < > 를 쓴다 */}
-        <Button key="ch-prev" label="이전 캐릭터" plain onPress={nav.prev}><Text bold color={tones.accent}>{'<'}</Text></Button>
-        <Box width={nav.nameColumns} justifyContent="center">
-          <Text bold color={tones.accent} wrap="truncate-end">{nav.label}</Text>
+        {/* ◀ ▶ 는 터미널·글꼴에 따라 한 칸이 되기도 두 칸이 되기도 해 줄이 흔들려서, 늘 한 칸인 < > 를 쓴다.
+            한 글자짜리는 마우스로 맞히기 어려워 테두리 있는 버튼([ < ])으로 누를 자리를 넓히고, A/D 로도 넘긴다 */}
+        <Button key="ch-prev" label="<" hotkey="a" onPress={nav.prev} />
+        {/* 이름 버튼을 누르면 이름 격자가 펼쳐지고, 다시 누르거나 하나를 고르면 닫힌다 */}
+        <Box width={nav.nameColumns + NAME_BUTTON_EXTRA} justifyContent="center">
+          <Button key="character" onPress={nav.toggle}>{`${nav.label} ${nav.isOpen ? '▴' : '▾'}`}</Button>
         </Box>
-        <Button key="ch-next" label="다음 캐릭터" plain onPress={nav.next}><Text bold color={tones.accent}>{'>'}</Text></Button>
+        <Button key="ch-next" label=">" hotkey="d" onPress={nav.next} />
       </Box>
       <Text color={tones.dim}>{nav.count}</Text>
-      {drawSpeech(el, v.speech, tones, ch)}
+      {nav.isOpen ? drawCharacterGrid(el, nav, columns) : null}
+      {drawSpeech(el, speech, tones, ch)}
     </Box>
   ) : pet ? (
     <Box flexDirection="row">
       {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
       <Box flexDirection="column" marginLeft={2} flexShrink={1}>
-        {drawSpeech(el, v.speech, tones, ch)}
+        {drawSpeech(el, speech, tones, ch)}
       </Box>
     </Box>
-  ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null
+  ) : speech ? <Text color={tones.accent}>{speech}</Text> : null
   return (
     <Box flexDirection="column">
       {stage}
@@ -212,7 +219,7 @@ export const register: Register = on => {
     if (!isPreview) forgetSite(SETTINGS_PANE)
     return (
       <Box flexDirection="column">
-        {await drawSettings($, el, tones, e.surface, e.props.isFocused)}
+        {await drawSettings($, el, tones, e.surface, e.props.isFocused, e.props.bodyColumns)}
         <Box marginTop={1} flexDirection="column" borderStyle="round" borderColor={tones.accent} paddingX={1}>
           <Text bold color={tones.accent}>미리보기</Text>
           {isPreview

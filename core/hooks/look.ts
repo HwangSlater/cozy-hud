@@ -6,8 +6,8 @@ const DEFAULT = 0x01000000
 const UPPER = 0x2580 // ▀
 const LOWER = 0x2584 // ▄
 const SPACE = 0x20
-/** 땀방울은 캐릭터 색과 상관없이 같은 글자를 쓴다 */
-const SWEAT = 'B'
+/** 땀방울 픽셀. 캐릭터 색 글자와 겹치지 않게 글자가 아닌 기호를 쓴다(예전 'B' 는 곰·토끼 몸 색과 겹쳐 몸이 땀색으로 칠해졌다) */
+const SWEAT = '~'
 
 /** 고른 크기의 그림. 그 크기가 없으면 기본(보통) 그림 */
 export function spriteOf(ch: HudCharacter, size: HudSize): HudSprite {
