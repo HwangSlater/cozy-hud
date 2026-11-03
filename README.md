@@ -31,7 +31,8 @@ Claude에게 일을 맡기고 나면 화면은 글자만 쌓여요. 지금 뭘 �
 - 토큰, 컨텍스트, 할 일 같은 계기판은 필요한 것만 골라 설치해요. 어떤 조합이든 같은 디자인으로 보여요.
 
 <div align="center">
-<img src="docs/images/hud.png" alt="실제로 쓰는 HUD 패널: 캐릭터, 말풍선, 할 일·컨텍스트·토큰 카드" width="380">
+<img src="docs/images/hud.png" alt="실제로 쓰는 HUD 패널: 캐릭터, 말풍선, 할 일·컨텍스트·토큰 카드" width="360">
+<img src="docs/images/hud-bun.png" alt="호빵을 작게 고른 HUD 패널" width="360">
 </div>
 
 ## 바로 시작하기

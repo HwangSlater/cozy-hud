@@ -33,7 +33,8 @@ Once Claude is working, the screen is just text piling up. It is hard to tell at
 - Install only the cards you want: tokens, context, to-dos. Any mix looks like one design.
 
 <div align="center">
-<img src="docs/images/hud.png" alt="The HUD pane in use: character, speech bubble, to-do, context and token cards" width="380">
+<img src="docs/images/hud.png" alt="The HUD pane in use: character, speech bubble, to-do, context and token cards" width="360">
+<img src="docs/images/hud-bun.png" alt="The HUD pane with the steamed bun at small size" width="360">
 </div>
 
 ## Get started

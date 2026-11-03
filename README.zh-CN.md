@@ -33,7 +33,8 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 - 令牌、上下文、待办等卡片只装需要的。任何组合都是同一套设计。
 
 <div align="center">
-<img src="docs/images/hud.png" alt="实际使用中的 HUD 面板:角色、气泡、待办·上下文·令牌卡片" width="380">
+<img src="docs/images/hud.png" alt="实际使用中的 HUD 面板:角色、气泡、待办·上下文·令牌卡片" width="360">
+<img src="docs/images/hud-bun.png" alt="选择小号包子的 HUD 面板" width="360">
 </div>
 
 ## 快速开始

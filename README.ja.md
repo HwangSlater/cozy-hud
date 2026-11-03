@@ -33,7 +33,8 @@ Claude に作業を任せると、画面には文字が積み重なるだけ。�
 - トークン、コンテキスト、ToDo などのカードは必要なものだけ入れられます。どの組み合わせでも同じデザインで表示されます。
 
 <div align="center">
-<img src="docs/images/hud.png" alt="実際に使っている HUD パネル:キャラクター、吹き出し、ToDo・コンテキスト・トークンのカード" width="380">
+<img src="docs/images/hud.png" alt="実際に使っている HUD パネル:キャラクター、吹き出し、ToDo・コンテキスト・トークンのカード" width="360">
+<img src="docs/images/hud-bun.png" alt="肉まんを小サイズにした HUD パネル" width="360">
 </div>
 
 ## はじめかた
