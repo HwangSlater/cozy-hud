@@ -78,16 +78,22 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
   else forgetSite(site)
   return (
     <Box flexDirection="column">
-      {pet || nav ? (
-        <Box flexDirection="row" alignItems="center">
-          {nav ? <Button key="ch-prev" label="이전 캐릭터" onPress={nav.prev}>◀</Button> : null}
-          <Box marginX={nav ? 1 : 0}>{pet ? drawPet(el, surface === 'terminal', pet.cells, pet.encoded) : <Text color={tones.dim}>(없음)</Text>}</Box>
-          {nav ? <Button key="ch-next" label="다음 캐릭터" onPress={nav.next}>▶</Button> : null}
+      {pet ? (
+        <Box flexDirection="row">
+          {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
           <Box flexDirection="column" marginLeft={2} flexShrink={1}>
             {drawSpeech(el, v.speech, tones, ch)}
           </Box>
         </Box>
       ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
+      {nav ? (
+        <Box key="ch-nav" flexDirection="row" columnGap={1} marginTop={pet ? 0 : 1}>
+          <Button key="ch-prev" label="이전 캐릭터" onPress={nav.prev}>◀</Button>
+          <Text bold color={tones.accent}>{nav.label}</Text>
+          <Text color={tones.dim}>{nav.count}</Text>
+          <Button key="ch-next" label="다음 캐릭터" onPress={nav.next}>▶</Button>
+        </Box>
+      ) : null}
       {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
       {shown.map(card => drawCard(el, card, columns, tones))}
     </Box>
@@ -200,10 +206,7 @@ export const register: Register = on => {
       <Box flexDirection="column">
         {await drawSettings($, el, tones, e.surface, e.props.isFocused)}
         <Box marginTop={1} flexDirection="column" borderStyle="round" borderColor={tones.accent} paddingX={1}>
-          <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
-            <Text bold color={tones.accent}>미리보기</Text>
-            {isPreview ? <Text color={tones.dim}>· {nav.label} {nav.count}</Text> : null}
-          </Box>
+          <Text bold color={tones.accent}>미리보기</Text>
           {isPreview
             ? await drawHud($, el, e.surface, e.props.bodyColumns - PREVIEW_INSET, SETTINGS_PANE, nav)
             : <Text color={tones.dim}>지금은 입력창 위 줄에만 보여요. 아래 줄에서 바로 확인하세요.</Text>}
