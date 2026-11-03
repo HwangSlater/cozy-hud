@@ -3,8 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudOption, HudSettings, HudTab, HudView } from '../types'
-import { drawPet, type Tones } from './draw'
-import { drawnAt, forgetSite, petArt } from './motion'
+import type { Tones } from './draw'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
@@ -22,6 +21,12 @@ type El = ReturnType<EngineInterface['ui']['resolve']>
 type Pickers = Partial<Pick<Extract<El, { Select: unknown }>, 'Select' | 'Input'>>
 
 const TABS: Record<HudTab, string> = { character: '캐릭터', layout: '배치·말풍선', theme: '테마', cards: '카드' }
+
+/** 패널이 키보드를 잡았을 때와 아닐 때 맨 위에 보이는 안내 */
+const KEY_HELP = {
+  focused: 'Tab 다음 칸 · Enter 고르기 · 숫자 1~4 탭 · Esc 닫기',
+  idle: '키보드로 바꾸려면 Ctrl+X 다음 Tab 을 누르세요',
+}
 
 /** 표(값 → 이름)를 Select 의 목록으로 */
 const choices = (table: Record<string, string>) => Object.entries(table).map(([value, label]) => ({ value, label }))
@@ -50,26 +55,18 @@ function pickList(el: El, key: string, label: string, options: readonly { value:
 const pickRow = (el: El, key: string, label: string, table: Record<string, string>, value: string, onPick: (v: string) => void) =>
   pickList(el, key, label, choices(table), value, onPick)
 
-async function characterTab($: $, el: El, s: HudSettings, tones: Tones, isTerminal: boolean) {
+async function characterTab($: $, el: El, s: HudSettings, tones: Tones) {
   const { Box, Text, Button } = el
   const list = Object.values(await read($, characters))
-  const pet = petArt(s.size.pane)
-  if (pet) drawnAt(SETTINGS_PANE, pet.encoded)
-  else forgetSite(SETTINGS_PANE)
   const current = s.character === 'none' ? '없음' : list.find(c => c.id === s.character)?.name ?? s.character
   const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
   return (
     <Box flexDirection="column">
-      <Box flexDirection="row">
-        {pet ? drawPet(el, isTerminal, pet.cells, pet.encoded) : <Text color={tones.dim}>(캐릭터 없음)</Text>}
-        <Box flexDirection="column" marginLeft={3}>
-          <Text bold color={tones.strong}>{current}</Text>
-          {pickRow(el, 'size-pane', '크기 · 패널', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
-          {pickRow(el, 'size-band', '크기 · 입력창 위', SIZES, s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })))}
-          {pickRow(el, 'speed', '움직임', SPEEDS, s.motion.speed, v => save(x => ({ ...x, motion: { ...x.motion, speed: v as HudSettings['motion']['speed'] } })))}
-          {pickRow(el, 'sleep', '잠들기', SLEEPS, s.motion.sleep, v => save(x => ({ ...x, motion: { ...x.motion, sleep: v as HudSettings['motion']['sleep'] } })))}
-        </Box>
-      </Box>
+      <Text bold color={tones.strong}>{current}</Text>
+      {pickRow(el, 'size-pane', '크기 · 패널', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
+      {pickRow(el, 'size-band', '크기 · 입력창 위', SIZES, s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })))}
+      {pickRow(el, 'speed', '움직임', SPEEDS, s.motion.speed, v => save(x => ({ ...x, motion: { ...x.motion, speed: v as HudSettings['motion']['speed'] } })))}
+      {pickRow(el, 'sleep', '잠들기', SLEEPS, s.motion.sleep, v => save(x => ({ ...x, motion: { ...x.motion, sleep: v as HudSettings['motion']['sleep'] } })))}
       <Box marginTop={1}><Text color={tones.dim}>캐릭터 고르기</Text></Box>
       <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
         {[...list.map(c => ({ id: c.id, name: c.name })), { id: 'none', name: '없음' }].map(c => (
@@ -173,25 +170,31 @@ async function undoReset($: $) {
 /** 목록(Select)·입력칸(Input)이 없는 화면 */
 const NO_PICKERS = new Set(['mobile'])
 
-export async function drawSettings($: $, table: El, tones: Tones, surface: string) {
+export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean) {
   // 모바일 표에도 Select 가 들어 있지만 그려지지 않아서, 화면 종류로 빼 버린다
   const el = (NO_PICKERS.has(surface) ? { ...table, Select: undefined, Input: undefined } : table) as El
-  const isTerminal = surface === 'terminal'
   const { Box, Text, Button } = el
   const s = await read($, settings)
   const v = await read($, view)
   mem.isSettingsShown = true
   const body =
-    v.tab === 'character' ? await characterTab($, el, s, tones, isTerminal)
+    v.tab === 'character' ? await characterTab($, el, s, tones)
     : v.tab === 'layout' ? layoutTab($, el, s, tones)
     : v.tab === 'theme' ? themeTab($, el, s)
     : await cardsTab($, el, s, tones)
   return (
     <Box flexDirection="column">
+      {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused : KEY_HELP.idle}</Text>}
       <Box flexDirection="row" columnGap={1}>
-        {(Object.keys(TABS) as HudTab[]).map(tab => (
-          <Button key={`tab-${tab}`} variant={tab === v.tab ? 'primary' : undefined} onPress={() => void update($, view, x => ({ ...x, tab }))}>
-            {TABS[tab]}
+        {(Object.keys(TABS) as HudTab[]).map((tab, i) => (
+          <Button
+            key={`tab-${tab}`}
+            hotkey={String(i + 1)}
+            autoFocus={tab === v.tab ? true : undefined}
+            variant={tab === v.tab ? 'primary' : undefined}
+            onPress={() => void update($, view, x => ({ ...x, tab }))}
+          >
+            {`${i + 1} ${TABS[tab]}`}
           </Button>
         ))}
       </Box>

@@ -3,7 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
-import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
+import { briefLine, drawCard, drawLine, drawPet, drawRule, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
 import { drawSettings, openSettings } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
@@ -61,6 +61,33 @@ function toolTalk(tool: string, input: { file_path?: string; pattern?: string; c
   if (mode === 'verb') return verb
   const target = input.file_path?.split(/[\\/]/).pop() ?? input.pattern ?? input.command?.slice(0, 24) ?? ''
   return `${target} ${verb}`.trim()
+}
+
+/** HUD 패널의 내용(캐릭터·말풍선·카드). HUD 패널과 설정 패널의 미리보기가 같이 쓴다 */
+async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string, columns: number, site: string) {
+  const { Box, Text } = el
+  const s = await read($, settings)
+  const ch = await currentCharacter($)
+  const tones = tonesFor(s, ch)
+  const shown = arrange(await read($, cards), s)
+  const v = await read($, live)
+  const pet = petArt(s.size.pane)
+  if (pet) drawnAt(site, pet.encoded)
+  else forgetSite(site)
+  return (
+    <Box flexDirection="column">
+      {pet ? (
+        <Box flexDirection="row">
+          {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
+          <Box flexDirection="column" marginLeft={2} flexShrink={1}>
+            {drawSpeech(el, v.speech, tones, ch)}
+          </Box>
+        </Box>
+      ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
+      {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
+      {shown.map(card => drawCard(el, card, columns, tones))}
+    </Box>
+  )
 }
 
 export const register: Register = on => {
@@ -152,37 +179,29 @@ export const register: Register = on => {
   })
 
   // ── 그리기 ──
+  // 설정 패널 아래에 HUD 패널을 그대로 그려, 바꾼 값을 탭을 넘기지 않고 본다
   on('ui.render', { component: 'Pane', requestId: SETTINGS_PANE }, async ($, e) => {
-    const s = await read($, settings)
-    return drawSettings($, $.ui.resolve(e), tonesFor(s, await currentCharacter($)), e.surface)
-  })
-
-  on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const el = $.ui.resolve(e)
     const { Box, Text } = el
     const s = await read($, settings)
-    const ch = await currentCharacter($)
-    const tones = tonesFor(s, ch)
-    const shown = arrange(await read($, cards), s)
-    const v = await read($, live)
-    const pet = petArt(s.size.pane)
-    if (pet) drawnAt(PANE, pet.encoded)
-    else forgetSite(PANE)
+    const tones = tonesFor(s, await currentCharacter($))
+    const isPreview = s.layout !== 'band'
+    if (!isPreview) forgetSite(SETTINGS_PANE)
     return (
       <Box flexDirection="column">
-        {pet ? (
-          <Box flexDirection="row">
-            {drawPet(el, e.surface === 'terminal', pet.cells, pet.encoded)}
-            <Box flexDirection="column" marginLeft={2} flexShrink={1}>
-              {drawSpeech(el, v.speech, tones, ch)}
-            </Box>
-          </Box>
-        ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
-        {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
-        {shown.map(card => drawCard(el, card, e.props.bodyColumns, tones))}
+        {await drawSettings($, el, tones, e.surface, e.props.isFocused)}
+        <Box marginTop={1} flexDirection="column">
+          {drawRule(el, { id: 'preview', title: '미리보기', lines: [] }, e.props.bodyColumns, tones)}
+          {isPreview
+            ? await drawHud($, el, e.surface, e.props.bodyColumns, SETTINGS_PANE)
+            : <Text color={tones.dim}>지금은 입력창 위 줄에만 보여요. 아래 줄에서 바로 확인하세요.</Text>}
+        </Box>
       </Box>
     )
   })
+
+  on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) =>
+    drawHud($, $.ui.resolve(e), e.surface, e.props.bodyColumns, PANE))
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const s = await read($, settings)

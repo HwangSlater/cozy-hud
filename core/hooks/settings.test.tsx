@@ -112,3 +112,14 @@ test('/hud 를 이름 없이 치면 설정 패널을 연다', async ($, on) => {
   expect(opened).toContain('cozy-hud-settings')
   expect(r.text).toContain('설정 패널')
 })
+
+test('설정 패널 아래에 HUD 미리보기가 같이 그려지고, 탭에는 숫자 단축키가 있다', async ($, on) => {
+  await start($, on)
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  // 시험의 캐릭터 목록에는 기본 캐릭터가 없어서 하나를 고른다
+  await ui.press({ key: 'ch-mochi' })
+  expect(await ui.find({ type: 'Raster', key: 'pet' })).toBeDefined()
+  const tab = await ui.find({ type: 'Button', key: 'tab-theme' })
+  expect((tab as { props?: { hotkey?: string } } | undefined)?.props?.hotkey).toBe('3')
+  await ui.unmount()
+})
