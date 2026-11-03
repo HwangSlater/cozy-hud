@@ -3,7 +3,7 @@ import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
-import { briefLine, drawCard, drawLine, drawPet, drawRule, drawSpeech, type Tones } from './draw'
+import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
 import { SETTINGS_TITLE, drawSettings, openSettings } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
@@ -23,6 +23,8 @@ const REACT_MS = 2500
 /** 컨텍스트가 이만큼 차면 땀 */
 const SWEAT_PERCENT = 80
 const MINUTE = 60 * 1000
+/** 미리보기 상자의 테두리 두 칸 + 안쪽 여백 두 칸 */
+const PREVIEW_INSET = 4
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
 
@@ -193,11 +195,11 @@ export const register: Register = on => {
     if (!isPreview) forgetSite(SETTINGS_PANE)
     return (
       <Box flexDirection="column">
-        {await drawSettings($, el, tones, e.surface, e.props.isFocused)}
-        <Box marginTop={1} flexDirection="column">
-          {drawRule(el, { id: 'preview', title: '미리보기', lines: [] }, e.props.bodyColumns, tones)}
+        {await drawSettings($, el, tones, e.surface, e.props.isFocused, e.props.bodyColumns)}
+        <Box marginTop={1} flexDirection="column" borderStyle="round" borderColor={tones.accent} paddingX={1}>
+          <Text bold color={tones.accent}>미리보기</Text>
           {isPreview
-            ? await drawHud($, el, e.surface, e.props.bodyColumns, SETTINGS_PANE)
+            ? await drawHud($, el, e.surface, e.props.bodyColumns - PREVIEW_INSET, SETTINGS_PANE)
             : <Text color={tones.dim}>지금은 입력창 위 줄에만 보여요. 아래 줄에서 바로 확인하세요.</Text>}
         </Box>
       </Box>

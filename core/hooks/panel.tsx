@@ -3,7 +3,8 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudOption, HudSettings, HudTab, HudView } from '../types'
-import type { Tones } from './draw'
+import { drawPet, type Tones } from './draw'
+import { thumbArt } from './motion'
 import {
   DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
   moveCard, optionValues, ordered, setOption, toggleHidden,
@@ -27,6 +28,9 @@ const KEY_HELP = {
   focused: 'Tab 다음 칸 · Enter 고르기 · 숫자 1~4 탭 · Esc 나가기',
   idle: '키보드로 바꾸려면 Ctrl+X 다음 Tab 을 누르세요',
 }
+
+/** 캐릭터 고르기 격자: 한 칸 너비, 이보다 좁은 패널은 이름 목록으로 */
+const GRID = { cellColumns: 16, minColumns: 50 }
 
 /** 표(값 → 이름)를 Select 의 목록으로 */
 const choices = (table: Record<string, string>) => Object.entries(table).map(([value, label]) => ({ value, label }))
@@ -58,26 +62,41 @@ function pickList(el: El, key: string, label: string, options: readonly { value:
 const pickRow = (el: El, key: string, label: string, table: Record<string, string>, value: string, onPick: (v: string) => void) =>
   pickList(el, key, label, choices(table), value, onPick)
 
-async function characterTab($: $, el: El, s: HudSettings, tones: Tones) {
+/** 넓으면 그림을 늘어놓고 이름 버튼으로 고른다. 좁으면 이름 목록 하나 */
+function characterPicker(el: El, list: readonly HudCharacter[], picked: string, isGrid: boolean, isTerminal: boolean, onPick: (id: string) => void) {
   const { Box, Text, Button } = el
+  const names = [...list.map(c => ({ value: c.id, label: c.name })), { value: 'none', label: '없음' }]
+  if (!isGrid) return pickList(el, 'character', '캐릭터', names, picked, onPick)
+  return (
+    <Box key="ch-grid" flexDirection="row" flexWrap="wrap" rowGap={1}>
+      {[...list, null].map(ch => {
+        const id = ch?.id ?? 'none'
+        const thumb = ch ? thumbArt(ch) : null
+        return (
+          <Box key={`cell-${id}`} width={GRID.cellColumns} flexDirection="column" alignItems="center" justifyContent="flex-end">
+            {thumb ? drawPet(el, isTerminal, thumb.cells, thumb.encoded, `thumb-${id}`) : <Text dimColor>—</Text>}
+            <Button key={`ch-${id}`} variant={id === picked ? 'primary' : undefined} onPress={() => onPick(id)}>
+              {ch?.name ?? '없음'}
+            </Button>
+          </Box>
+        )
+      })}
+    </Box>
+  )
+}
+
+async function characterTab($: $, el: El, s: HudSettings, tones: Tones, columns: number, isTerminal: boolean) {
+  const { Box, Text } = el
   const list = Object.values(await read($, characters))
-  const current = s.character === 'none' ? '없음' : list.find(c => c.id === s.character)?.name ?? s.character
   const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
   return (
     <Box flexDirection="column">
-      <Text bold color={tones.strong}>{current}</Text>
+      {characterPicker(el, list, s.character, columns >= GRID.minColumns, isTerminal, id => save(x => ({ ...x, character: id })))}
+      <Box marginTop={1} />
       {pickRow(el, 'size-pane', '크기 · 패널', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
       {pickRow(el, 'size-band', '크기 · 입력창 위', SIZES, s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })))}
       {pickRow(el, 'speed', '움직임', SPEEDS, s.motion.speed, v => save(x => ({ ...x, motion: { ...x.motion, speed: v as HudSettings['motion']['speed'] } })))}
       {pickRow(el, 'sleep', '잠들기', SLEEPS, s.motion.sleep, v => save(x => ({ ...x, motion: { ...x.motion, sleep: v as HudSettings['motion']['sleep'] } })))}
-      <Box marginTop={1}><Text color={tones.dim}>캐릭터 고르기</Text></Box>
-      <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
-        {[...list.map(c => ({ id: c.id, name: c.name })), { id: 'none', name: '없음' }].map(c => (
-          <Button key={`ch-${c.id}`} variant={c.id === s.character ? 'primary' : undefined} onPress={() => save(x => ({ ...x, character: c.id }))}>
-            {c.name}
-          </Button>
-        ))}
-      </Box>
       {list.length === 0 ? <Text color={tones.dim}>캐릭터를 불러오지 못했어요. 코어를 다시 설치해 보세요.</Text> : null}
     </Box>
   )
@@ -173,7 +192,7 @@ async function undoReset($: $) {
 /** 목록(Select)·입력칸(Input)이 없는 화면 */
 const NO_PICKERS = new Set(['mobile'])
 
-export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean) {
+export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean, columns: number) {
   // 모바일 표에도 Select 가 들어 있지만 그려지지 않아서, 화면 종류로 빼 버린다
   const el = (NO_PICKERS.has(surface) ? { ...table, Select: undefined, Input: undefined } : table) as El
   const { Box, Text, Button } = el
@@ -181,7 +200,7 @@ export async function drawSettings($: $, table: El, tones: Tones, surface: strin
   const v = await read($, view)
   mem.isSettingsShown = true
   const body =
-    v.tab === 'character' ? await characterTab($, el, s, tones)
+    v.tab === 'character' ? await characterTab($, el, s, tones, columns, surface === 'terminal')
     : v.tab === 'layout' ? layoutTab($, el, s, tones)
     : v.tab === 'theme' ? themeTab($, el, s)
     : await cardsTab($, el, s, tones)

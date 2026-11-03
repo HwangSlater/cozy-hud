@@ -69,19 +69,19 @@ export function drawCard(el: El, card: HudCard, width: number, tones: Tones) {
 }
 
 /** 캐릭터: 터미널은 Raster(칸만 바꿔 끼워 움직임), 다른 화면은 글자 칸 */
-export function drawPet(el: El, isTerminal: boolean, cells: readonly (readonly Cell[])[], encoded: string) {
+export function drawPet(el: El, isTerminal: boolean, cells: readonly (readonly Cell[])[], encoded: string, key = 'pet') {
   const { Box, Text } = el
   const columns = cells[0]?.length ?? 0
   if (isTerminal && 'Raster' in el) {
     const { Raster } = el
-    return <Raster key="pet" columns={columns} rows={cells.length} cells={encoded} />
+    return <Raster key={key} columns={columns} rows={cells.length} cells={encoded} />
   }
   return (
-    <Box key="pet" flexDirection="column">
+    <Box key={key} flexDirection="column">
       {cells.map((line, r) => (
-        <Box key={`pet-${r}`} flexDirection="row">
+        <Box key={`${key}-${r}`} flexDirection="row">
           {line.map((cell, x) => (
-            <Text key={`pet-${r}-${x}`} color={cell.fg ?? undefined} backgroundColor={cell.bg ?? undefined}>
+            <Text key={`${key}-${r}-${x}`} color={cell.fg ?? undefined} backgroundColor={cell.bg ?? undefined}>
               {cell.glyph}
             </Text>
           ))}

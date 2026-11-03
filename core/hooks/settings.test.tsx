@@ -130,3 +130,15 @@ test('세션이 시작되면 HUD 와 HUD 설정 탭을 같이 연다', async ($,
   for (let i = 0; i < 20 && opened.length < 2; i++) await Promise.resolve()
   expect(opened).toEqual(['cozy-hud-settings', 'cozy-hud'])
 })
+
+test('넓으면 캐릭터 그림을 늘어놓고, 좁으면 이름 목록으로 고른다', async ($, on) => {
+  const { saved } = await start($, on)
+  const wide = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  expect(await wide.find({ type: 'Raster', key: 'thumb-bun' })).toBeDefined()
+  await wide.unmount()
+  const narrow = await $.ui.mount({ ...SETTINGS_PANE, props: { ...SETTINGS_PANE.props, bodyColumns: 40 }, surface: 'terminal' })
+  expect(await narrow.find({ type: 'Raster', key: 'thumb-bun' })).toBeUndefined()
+  await narrow.select({ key: 'character', value: 'bun' })
+  expect(saved.at(-1)?.character).toBe('bun')
+  await narrow.unmount()
+})
