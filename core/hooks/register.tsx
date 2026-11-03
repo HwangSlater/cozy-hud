@@ -76,26 +76,32 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
   const pet = petArt(s.size.pane)
   if (pet) drawnAt(site, pet.encoded)
   else forgetSite(site)
+  // 설정 미리보기(nav 있음): 캐릭터 · 「< 이름 >」 · 순번 · 말풍선을 가운데 한 줄기로 쌓아 좌우 대칭
+  const stage = nav ? (
+    <Box key="stage" flexDirection="column" alignItems="center">
+      {pet ? drawPet(el, surface === 'terminal', pet.cells, pet.encoded) : <Text color={tones.dim}>(캐릭터 없음)</Text>}
+      <Box key="ch-nav" flexDirection="row" columnGap={1}>
+        {/* ◀ ▶ 는 터미널·글꼴에 따라 한 칸이 되기도 두 칸이 되기도 해 줄이 흔들려서, 늘 한 칸인 < > 를 쓴다 */}
+        <Button key="ch-prev" label="이전 캐릭터" plain onPress={nav.prev}><Text bold color={tones.accent}>{'<'}</Text></Button>
+        <Box width={nav.nameColumns} justifyContent="center">
+          <Text bold color={tones.accent} wrap="truncate-end">{nav.label}</Text>
+        </Box>
+        <Button key="ch-next" label="다음 캐릭터" plain onPress={nav.next}><Text bold color={tones.accent}>{'>'}</Text></Button>
+      </Box>
+      <Text color={tones.dim}>{nav.count}</Text>
+      {drawSpeech(el, v.speech, tones, ch)}
+    </Box>
+  ) : pet ? (
+    <Box flexDirection="row">
+      {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
+      <Box flexDirection="column" marginLeft={2} flexShrink={1}>
+        {drawSpeech(el, v.speech, tones, ch)}
+      </Box>
+    </Box>
+  ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null
   return (
     <Box flexDirection="column">
-      {pet ? (
-        <Box flexDirection="row">
-          {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
-          <Box flexDirection="column" marginLeft={2} flexShrink={1}>
-            {drawSpeech(el, v.speech, tones, ch)}
-          </Box>
-        </Box>
-      ) : v.speech ? <Text color={tones.accent}>{v.speech}</Text> : null}
-      {nav ? (
-        <Box key="ch-nav" flexDirection="row" alignItems="center" columnGap={1} marginTop={pet ? 0 : 1}>
-          <Button key="ch-prev" label="이전 캐릭터" plain onPress={nav.prev}>[◀]</Button>
-          <Box flexDirection="column" alignItems="center" width={nav.nameColumns}>
-            <Text bold color={tones.accent} wrap="truncate-end">{nav.label}</Text>
-            <Text color={tones.dim}>{nav.count}</Text>
-          </Box>
-          <Button key="ch-next" label="다음 캐릭터" plain onPress={nav.next}>[▶]</Button>
-        </Box>
-      ) : null}
+      {stage}
       {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
       {shown.map(card => drawCard(el, card, columns, tones))}
     </Box>

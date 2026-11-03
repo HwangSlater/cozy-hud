@@ -86,7 +86,7 @@ async function characterTab($: $, el: El, s: HudSettings, tones: Tones) {
   return (
     <Box flexDirection="column">
       {pickList(el, 'character', '캐릭터', characterNames(list), s.character, id => save(x => ({ ...x, character: id })))}
-      <Text color={tones.dim}>아래 미리보기의 ◀ ▶ 로도 넘겨요</Text>
+      <Text color={tones.dim}>{'아래 미리보기의 < > 로도 넘겨요'}</Text>
       <Box marginTop={1} />
       {pickRow(el, 'size-pane', '크기 · 패널', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
       {pickRow(el, 'size-band', '크기 · 입력창 위', SIZES, s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })))}
