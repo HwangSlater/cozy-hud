@@ -14,7 +14,9 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 
 [한국어](README.md) · [English](README.en.md) · [日本語](README.ja.md) · **简体中文**
 
-<img src="docs/images/characters.png" alt="cozy-hud 的 14 个角色" width="760">
+<img src="docs/images/demo-work.gif" alt="Claude 修复 shop.py 的 bug 时会动的 HUD:气泡显示正在做什么，回复结束后令牌和上下文卡片会填上" width="820">
+
+<sub>Claude 正在修 bug(3 倍速)。气泡显示正在做什么，回复结束后令牌和上下文卡片会填上。</sub>
 
 </div>
 
@@ -31,11 +33,6 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 - Claude 工作时角色会踏步，任务完成时会跳，上下文超过 80% 时会冒汗，长时间休息会睡着。
 - 每次使用工具时，用气泡告诉你它在做什么，比如"正在读取 register.tsx"。
 - 令牌、上下文、待办等卡片只装需要的。任何组合都是同一套设计。
-
-<div align="center">
-<img src="docs/images/hud.png" alt="实际使用中的 HUD 面板:角色、气泡、待办·上下文·令牌卡片" width="360">
-<img src="docs/images/hud-bun.png" alt="选择小号包子的 HUD 面板" width="360">
-</div>
 
 ## 快速开始
 
@@ -67,20 +64,35 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 
 角色:Claude、猫、企鹅、小鸡、兔子、狐狸、北极狐、小狗、青蛙、熊、熊猫、仓鼠、草莓大福、包子。
 
+<div align="center"><img src="docs/images/characters.png" alt="cozy-hud 的 14 个角色" width="760"></div>
+
 ## 修改设置
 
-在 "HUD 设置" 标签页里用鼠标或键盘修改。改动会立刻显示在下方预览中，换会话也会保留。
+在 "HUD 设置" 标签页里用鼠标或键盘修改。最上方的预览始终可见，在下面的列表中像 "样式 › 角色" 这样进入后选择。点击顶部路径("设置 › 样式 › 角色")前面的部分，可直接回到那一层。改动换会话也会保留。
 
-| 标签 | 可选内容 |
+<div align="center">
+<img src="docs/images/demo-settings.gif" alt="在 HUD 设置标签页切换角色，并把样式改成大·中·小，上方预览立即变化" width="400">
+
+<sub>这里用键盘操作，用鼠标点击也一样。</sub>
+</div>
+
+| 列表 | 可选内容 |
 | --- | --- |
-| 角色 | 面板和输入框上方的大小(大·中·小)、动作速度、入睡时间 |
-| 布局·气泡 | 显示位置、使用工具时的气泡、完成和警告时的反应 |
+| 样式 | HUD 样式(大·中·小)以及该样式用到的设置:角色大小、气泡、每张卡片的设置 |
+| 布局 | 显示位置、输入框上方的大小、动作速度、入睡时间、完成和警告时的反应 |
 | 主题 | 自动 · 基本 · 琥珀 · 薄荷 · 黑白 |
-| 卡片 | 显示或隐藏、顺序、每张卡片的设置 |
+| 卡片 | 显示或隐藏、顺序 |
+
+按面板宽度选择样式。**大**(50 列以上)在卡片里加上详细行，**中**是常规样式，**小**(22–32 列)把每张卡片缩成一行，每一行都可以单独开关。
+
+<table align="center">
+<tr><th>大</th><th>中</th><th>小</th></tr>
+<tr><td valign="top"><img src="docs/images/form-large.png" alt="大: 宽面板 · 含详细行" width="260"><br><sub>宽面板 · 含详细行</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="中: 普通面板 · 卡片" width="260"><br><sub>普通面板 · 卡片</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="小: 窄面板 · 每张卡片一行" width="260"><br><sub>窄面板 · 每张卡片一行</sub></td></tr>
+</table>
 
 在预览下方用 `[ < ]` `[ > ]` 切换角色，或点名字从完整列表中选择。
 
-键盘:按 `Ctrl+X` 再按 `Tab` 进入设置标签页。`Tab` 下一项 · `Enter` 选择 · `1`–`4` 标签 · `A`/`D` 切换角色 · `Esc` 离开。
+键盘:按 `Ctrl+X` 再按 `Tab` 进入设置标签页。`Tab` 下一项 · `Enter` 选择 · `A`/`D` 切换角色 · `Esc` 离开。
 
 也有直接修改的命令:
 
@@ -89,6 +101,7 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 /hud character cat      更换角色
 /hud theme mint         更换主题
 /hud layout pane        只在面板显示
+/hud form small         更换 HUD 样式(large·medium·small)
 /hud reset              恢复默认
 ```
 

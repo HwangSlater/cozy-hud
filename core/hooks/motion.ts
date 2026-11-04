@@ -1,6 +1,6 @@
 // 캐릭터 움직임. 타이머마다 엔진에 묻지 않도록 필요한 값은 mem 에 같이 들고 있고,
 // 같은 모습(자세)은 한 번만 계산해 둔다. 자리마다 지난번과 같은 자세면 아무 일도 하지 않는다.
-import type { HudCharacter, HudMood, HudSettings, HudSize } from '../types'
+import type { HudCharacter, HudMood, HudPaneSize, HudSettings } from '../types'
 import { colorOf, frameRows, rasterCells, toCells, type Cell } from './look'
 import { PANE, SETTINGS_PANE, mem, type $ } from './state'
 
@@ -35,10 +35,10 @@ function currentCharacter(): HudCharacter | null {
   return id === 'none' ? null : mem.characters[id] ?? null
 }
 
-/** 지금 고른 캐릭터를 그 크기·지금 자세로. 캐릭터가 없으면 null */
-export function petArt(size: HudSize): PetArt | null {
+/** 지금 고른 캐릭터를 그 크기·지금 자세로. 캐릭터가 없거나 숨기기(none)면 null */
+export function petArt(size: HudPaneSize): PetArt | null {
   const ch = currentCharacter()
-  if (!ch) return null
+  if (!ch || size === 'none') return null
   const sweat = (mem.themes[mem.settings.theme] ?? mem.themes.auto)?.sweat ?? 'claude'
   const key = `${ch.id}|${size}|${sweat}|${poseOf(mem.mood, mem.frame)}`
   let hit = art.get(key)
@@ -70,7 +70,7 @@ export function forgetSite(site: string) {
 async function step($: $) {
   mem.frame++
   const s = mem.settings
-  const sites: [string | null, HudSize][] = [
+  const sites: [string | null, HudPaneSize][] = [
     [s.layout === 'band' ? null : PANE, s.size.pane],
     [s.layout === 'pane' ? null : mem.bandSite, s.size.band],
     [mem.isSettingsShown ? SETTINGS_PANE : null, s.size.pane],

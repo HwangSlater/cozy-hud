@@ -14,7 +14,9 @@ Claude가 일하면 같이 움직이고, 끝내면 뛰고, 지치면 땀을 흘�
 
 **한국어** · [English](README.en.md) · [日本語](README.ja.md) · [简体中文](README.zh-CN.md)
 
-<img src="docs/images/characters.png" alt="cozy-hud 캐릭터 14종" width="760">
+<img src="docs/images/demo-work.gif" alt="Claude가 shop.py 버그를 고치는 동안 움직이는 HUD. 말풍선이 하는 일을 알려 주고, 답변이 끝나면 토큰·컨텍스트 카드가 채워진다" width="820">
+
+<sub>Claude가 버그를 고치는 동안(3배속). 말풍선이 하는 일을 알려 주고, 답변이 끝나면 토큰·컨텍스트 카드가 채워져요.</sub>
 
 </div>
 
@@ -29,11 +31,6 @@ Claude에게 일을 맡기고 나면 화면은 글자만 쌓여요. 지금 뭘 �
 - 캐릭터는 Claude가 일하는 동안 발을 움직이고, 할 일을 끝내면 뛰고, 컨텍스트가 80%를 넘으면 땀을 흘리고, 오래 쉬면 잠들어요.
 - 도구를 쓸 때마다 말풍선으로 무엇을 하는지 알려 줘요. 「register.tsx 읽는 중」처럼요.
 - 토큰, 컨텍스트, 할 일 같은 계기판은 필요한 것만 골라 설치해요. 어떤 조합이든 같은 디자인으로 보여요.
-
-<div align="center">
-<img src="docs/images/hud.png" alt="실제로 쓰는 HUD 패널: 캐릭터, 말풍선, 할 일·컨텍스트·토큰 카드" width="360">
-<img src="docs/images/hud-bun.png" alt="호빵을 작게 고른 HUD 패널" width="360">
-</div>
 
 ## 바로 시작하기
 
@@ -65,20 +62,35 @@ Claude Code에서 한 번만 설치하세요.
 
 캐릭터는 클로드, 고양이, 펭귄, 병아리, 토끼, 여우, 북극여우, 강아지, 개구리, 곰, 판다, 햄스터, 찹쌀떡, 호빵이에요.
 
+<div align="center"><img src="docs/images/characters.png" alt="cozy-hud 캐릭터 14종" width="760"></div>
+
 ## 바꾸기
 
-「HUD 설정」 탭에서 마우스나 키보드로 바꿔요. 바꾼 값은 아래 미리보기에 바로 보이고, 세션이 바뀌어도 남아요.
+「HUD 설정」 탭에서 마우스나 키보드로 바꿔요. 맨 위 미리보기는 늘 보이고, 그 아래 목록에서 「모양 › 캐릭터」처럼 들어가 골라요. 맨 위 경로(「설정 › 모양 › 캐릭터」)의 앞 칸을 누르면 그 단계로 바로 돌아가요. 바꾼 값은 세션이 바뀌어도 남아요.
 
-| 탭 | 고르는 것 |
+<div align="center">
+<img src="docs/images/demo-settings.gif" alt="HUD 설정 탭에서 캐릭터를 넘기고 모양을 크게·보통·작게로 바꾸면 위 미리보기가 바로 바뀌는 화면" width="400">
+
+<sub>키보드로 조작한 화면이에요. 마우스로 눌러도 똑같아요.</sub>
+</div>
+
+| 목록 | 고르는 것 |
 | --- | --- |
-| 캐릭터 | 패널·입력창 위 크기(크게·보통·작게), 움직임 속도, 잠드는 시간 |
-| 배치·말풍선 | 보일 곳(패널·입력창 위), 도구를 쓸 때 말풍선, 끝냄·경고 반응 |
+| 모양 | HUD 모양(크게·보통·작게)과 그 모양에서 쓰는 설정만: 캐릭터 크기, 말풍선, 카드별 설정 |
+| 배치 | 보일 곳(패널·입력창 위), 입력창 위 크기, 움직임 속도, 잠드는 시간, 끝냄·경고 반응 |
 | 테마 | 자동 · 기본 · 호박 · 민트 · 흑백 |
-| 카드 | 카드 보임·숨김, 순서, 카드별 설정 |
+| 카드 | 카드 보임·숨김, 순서 |
+
+모양은 패널 폭에 맞춰 고르세요. **크게**(50칸 이상)는 카드에 세부 줄까지, **보통**은 지금 모양, **작게**(22~32칸)는 카드마다 한 줄로 줄이고 보일 줄을 하나씩 켜고 끌 수 있어요.
+
+<table align="center">
+<tr><th>크게</th><th>보통</th><th>작게</th></tr>
+<tr><td valign="top"><img src="docs/images/form-large.png" alt="크게: 넓은 패널 · 세부 줄까지" width="260"><br><sub>넓은 패널 · 세부 줄까지</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="보통: 보통 패널 · 카드" width="260"><br><sub>보통 패널 · 카드</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="작게: 좁은 패널 · 카드마다 한 줄" width="260"><br><sub>좁은 패널 · 카드마다 한 줄</sub></td></tr>
+</table>
 
 캐릭터는 미리보기 아래 `[ < ]` `[ > ]`로 넘기거나, 이름을 눌러 전체 목록에서 골라요.
 
-키보드: `Ctrl+X` 다음 `Tab`으로 설정 탭에 들어가면 `Tab` 다음 칸 · `Enter` 고르기 · `1`~`4` 탭 · `A`/`D` 캐릭터 넘기기 · `Esc` 나가기.
+키보드: `Ctrl+X` 다음 `Tab`으로 설정 탭에 들어가면 `Tab` 다음 칸 · `Enter` 고르기 · `A`/`D` 캐릭터 넘기기 · `Esc` 나가기.
 
 바로 바꾸는 명령도 있어요.
 
@@ -87,6 +99,7 @@ Claude Code에서 한 번만 설치하세요.
 /hud character cat      캐릭터 바꾸기
 /hud theme mint         테마 바꾸기
 /hud layout pane        패널에만 보이기
+/hud form small         HUD 모양 바꾸기(large·medium·small)
 /hud reset              초기화
 ```
 

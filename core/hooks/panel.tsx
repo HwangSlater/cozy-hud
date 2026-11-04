@@ -1,50 +1,28 @@
-// 설정 패널: 탭(캐릭터 · 배치·말풍선 · 테마 · 카드)마다 버튼과 목록으로 고른다.
+// 설정 패널의 부품: 탭 열기, 캐릭터 넘기기, 고르기 목록, 테마·카드 쪽, 초기화. 쪽 구조(설정 › 모양 › 캐릭터)는 pages.tsx.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface } from 'claude-code'
 
-import type { HudCard, HudCharacter, HudLayout, HudOption, HudSettings, HudTab, HudView } from '../types'
+import type { HudCard, HudCharacter, HudForm, HudLayout, HudOption, HudSettings, HudView } from '../types'
 import { cellWidth, drawLine, type Tones } from './draw'
-import {
-  DEFAULTS, LAYOUTS, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
-  moveCard, optionValues, ordered, setOption, toggleHidden,
-} from './settings'
+import { DEFAULTS, choicesInForm, moveCard, ordered, setOption, toggleHidden } from './settings'
 import { PANE, SETTINGS_PANE, mem, saveSettings, type $ } from './state'
 
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
 const characters = atom({ plugin: 'cozy-hud', key: 'characters' } as const, {} as Readonly<Record<string, HudCharacter>>, { shape: 'characters-2' })
-const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS, { shape: 'settings-2' })
-const view = atom({ plugin: 'cozy-hud', key: 'view' } as const, { tab: 'character', canUndo: false } as HudView, { shape: 'view-2' })
+const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS, { shape: 'settings-3' })
+const view = atom({ plugin: 'cozy-hud', key: 'view' } as const, { path: [], canUndo: false } as HudView, { shape: 'view-4' })
 
-type El = ReturnType<EngineInterface['ui']['resolve']>
+export type El = ReturnType<EngineInterface['ui']['resolve']>
 /** 목록·입력칸이 있는 화면의 표. 없는 화면에서는 두 칸이 비어 있다 */
 type Pickers = Partial<Pick<Extract<El, { Select: unknown }>, 'Select' | 'Input'>>
 
-const TABS: Record<HudTab, string> = { character: '캐릭터', layout: '배치·말풍선', theme: '테마', cards: '카드' }
-
-/** 패널이 키보드를 잡았을 때와 아닐 때 맨 위에 보이는 안내 */
-const KEY_HELP = {
-  focused: 'Tab 다음 칸 · Enter 고르기 · 1~4 탭 · A/D 캐릭터 · Esc 나가기',
-  idle: '키보드: Ctrl+X 다음 Tab',
-}
-
-/** 이만큼까지는 펼치는 목록 대신 버튼 줄로 보여 한 번에 고르게 한다 */
-const MAX_BUTTON_CHOICES = 5
-/** 항목 이름 칸 너비(가장 긴 「입력창 위 크기」·「끝냄·경고 반응」에 맞춤). 버튼이 세로로 가지런히 선다 */
-const LABEL_COLUMNS = 17
 /** 고른 버튼 앞에 붙이는 표시. 색이 잘 안 보이는 터미널에서도 무엇을 골랐는지 알게 한다 */
-const PICKED_MARK = '✓'
-/** 카드 순서 목록에서 한 줄 요약을 들여 쓰는 칸(순번 두 칸 + 사이 한 칸 + 보이기 칸 테두리) */
-const SUMMARY_INDENT = 5
+export const PICKED_MARK = '✓'
+/** 카드 순서 목록에서 한 줄 요약을 들여 쓰는 칸(순번 · 사이 · ✓ · 사이 다음, 카드 이름과 같은 자리) */
+const SUMMARY_INDENT = 4
 /** 글자 설정 입력칸이 비었을 때 보이는 말 */
 const TEXT_PLACEHOLDER = '여기에 입력'
-
-/** 항목 이름을 칸 수에 맞춰 오른쪽을 공백으로 채운다(한글은 두 칸) */
-const padLabel = (label: string) => label + ' '.repeat(Math.max(1, LABEL_COLUMNS - cellWidth(label)))
-
-
-/** 표(값 → 이름)를 Select 의 목록으로 */
-const choices = (table: Record<string, string>) => Object.entries(table).map(([value, label]) => ({ value, label }))
 
 export const SETTINGS_TITLE = 'HUD 설정'
 
@@ -68,54 +46,28 @@ export async function ensurePanes($: $, layout: HudLayout) {
   }
 }
 
-/** 버튼 하나가 차지하는 칸: 「[ 이름 ]」 + 사이 한 칸 */
-const buttonColumns = (label: string) => cellWidth(label) + 5
-
-/** 묶음 제목: 굵은 이름 + 판 끝까지 흐린 가로줄 */
-function section(el: El, columns: number, tones: Tones, key: string, title: string, isFirst = false) {
-  const { Box, Text } = el
-  return (
-    <Box key={key} marginTop={isFirst ? 0 : 1} flexDirection="row">
-      <Text bold color={tones.strong}>{title} </Text>
-      <Text color={tones.line}>{'─'.repeat(Math.max(0, columns - cellWidth(title) - 1))}</Text>
-    </Box>
-  )
-}
-
 /**
- * 하나 고르기: 고를 것이 적으면 버튼 줄(한 번 클릭), 많으면 펼치는 목록. 목록이 없는 화면(모바일)은 늘 버튼 줄.
- * 버튼 줄이 이름 옆에 다 들어가면 한 줄, 아니면 이름 아래에 들여 써서 넘쳐도 어느 항목인지 보이게 한다.
+ * 하나 고르기(시안 1): 테두리 없는 줄을 한 줄에 하나씩. 고른 줄은 강조색 ✓ 와 굵은 글자.
+ * 좁은 패널에서도 줄이 바뀌지 않고, 고른 뒤에도 그 쪽에 머물러 위 미리보기로 바로 비교한다
  */
-function pickList(el: El, columns: number, key: string, label: string, options: readonly { value: string; label: string }[], value: string, onPick: (v: string) => void) {
+export function choiceList(el: El, key: string, options: readonly { value: string; label: string }[], value: string, onPick: (v: string) => void, tones: Tones) {
   const { Box, Text, Button } = el
-  const { Select } = el as Pickers
-  if (Select && options.length > MAX_BUTTON_CHOICES) {
-    return <Select key={key} label={padLabel(label)} options={options} value={value} onSelect={v => onPick(v)} />
-  }
-  // 고르지 않은 버튼도 표시 자리만큼 빈칸을 둬, 고를 때 뒤 버튼이 밀리지 않게 한다
-  const shown = (o: { value: string; label: string }) => (o.value === value ? PICKED_MARK : ' ') + o.label
-  const buttons = options.map(o => (
-    <Button key={`${key}-${o.value}`} variant={o.value === value ? 'primary' : undefined} onPress={() => onPick(o.value)}>{shown(o)}</Button>
-  ))
-  const isOneLine = LABEL_COLUMNS + options.reduce((sum, o) => sum + buttonColumns(shown(o)), 0) <= columns
-  if (isOneLine) {
-    return (
-      <Box key={key} flexDirection="row" columnGap={1}>
-        <Text>{padLabel(label)}</Text>
-        {buttons}
-      </Box>
-    )
-  }
   return (
     <Box key={key} flexDirection="column">
-      <Text>{label}</Text>
-      <Box marginLeft={2} flexDirection="row" flexWrap="wrap" columnGap={1}>{buttons}</Box>
+      {options.map(o => {
+        const isPicked = o.value === value
+        return (
+          <Box key={`${key}-${o.value}-row`}>
+            <Button key={`${key}-${o.value}`} plain onPress={() => onPick(o.value)}>
+              <Text color={tones.accent}>{isPicked ? PICKED_MARK : ' '}</Text>
+              <Text color={isPicked ? tones.strong : tones.text} bold={isPicked}>{` ${o.label}`}</Text>
+            </Button>
+          </Box>
+        )
+      })}
     </Box>
   )
 }
-
-const pickRow = (el: El, columns: number, key: string, label: string, table: Record<string, string>, value: string, onPick: (v: string) => void) =>
-  pickList(el, columns, key, label, choices(table), value, onPick)
 
 /** 고를 수 있는 캐릭터 이름(마지막은 「없음」) */
 const characterNames = (list: readonly HudCharacter[]) => [...list.map(c => ({ value: c.id, label: c.name })), { value: 'none', label: '없음' }]
@@ -181,53 +133,23 @@ export function drawCharacterGrid(el: El, nav: CharacterNav, columns: number) {
   )
 }
 
-async function characterTab($: $, el: El, columns: number, s: HudSettings, tones: Tones) {
-  const { Box, Text } = el
-  const list = Object.values(await read($, characters))
-  const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
-  return (
-    <Box flexDirection="column">
-      {/* 캐릭터 고르기는 미리보기의 넘기기 줄(「[ < ] 이름 ▾ [ > ]」)에서 한다 */}
-      {section(el, columns, tones, 'sec-look', '크기', true)}
-      {pickRow(el, columns, 'size-pane', '패널 크기', SIZES, s.size.pane, v => save(x => ({ ...x, size: { ...x.size, pane: v as HudSettings['size']['pane'] } })))}
-      {pickRow(el, columns, 'size-band', '입력창 위 크기', SIZES, s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })))}
-      {section(el, columns, tones, 'sec-motion', '움직임')}
-      {pickRow(el, columns, 'speed', '속도', SPEEDS, s.motion.speed, v => save(x => ({ ...x, motion: { ...x.motion, speed: v as HudSettings['motion']['speed'] } })))}
-      {pickRow(el, columns, 'sleep', '잠들기', SLEEPS, s.motion.sleep, v => save(x => ({ ...x, motion: { ...x.motion, sleep: v as HudSettings['motion']['sleep'] } })))}
-      {list.length === 0 ? <Text color={tones.dim}>캐릭터를 불러오지 못했어요. 코어를 다시 설치해 보세요.</Text> : null}
-    </Box>
-  )
-}
-
-function layoutTab($: $, el: El, columns: number, s: HudSettings, tones: Tones) {
-  const { Box, Text } = el
-  const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
-  return (
-    <Box flexDirection="column">
-      {section(el, columns, tones, 'sec-place', '배치', true)}
-      {pickRow(el, columns, 'layout', '보일 곳', LAYOUTS, s.layout, v => save(x => ({ ...x, layout: v as HudSettings['layout'] })))}
-      {section(el, columns, tones, 'sec-speech', '말풍선')}
-      {pickRow(el, columns, 'talk-tools', '도구를 쓸 때', TOOL_TALK, s.speech.tools, v => save(x => ({ ...x, speech: { ...x.speech, tools: v as HudSettings['speech']['tools'] } })))}
-      {pickRow(el, columns, 'talk-react', '끝냄·경고 반응', REACT, s.speech.react, v => save(x => ({ ...x, speech: { ...x.speech, react: v as 'on' | 'off' } })))}
-    </Box>
-  )
-}
-
-function themeTab($: $, el: El, s: HudSettings) {
+/** 테마 쪽: 고르기 줄과 같은 모양, 이름 뒤에 색 견본(이름 칸을 맞춰 견본이 세로로 선다) */
+export function themePage($: $, el: El, s: HudSettings, tones: Tones) {
   const { Box, Text, Button } = el
+  const themes = Object.entries(mem.themes)
+  const nameColumns = Math.max(0, ...themes.map(([, t]) => cellWidth(t.name)))
   return (
     <Box flexDirection="column">
-      {Object.entries(mem.themes).map(([id, t]) => {
+      {themes.map(([id, t]) => {
+        const isPicked = id === s.theme
         const swatch = ['accent', 'ok', 'warn', 'err'].map(k => t.tones[k] ?? 'text')
         return (
-          // 좁은 판에서는 색 견본이 다음 줄로 내려가게(판 밖으로 밀리지 않게) 감싼다
-          <Box key={`theme-${id}`} flexDirection="row" flexWrap="wrap" columnGap={1}>
-            <Button key={`th-${id}`} variant={id === s.theme ? 'primary' : undefined} onPress={() => void saveSettings($, x => ({ ...x, theme: id }))}>
-              {(id === s.theme ? PICKED_MARK : ' ') + t.name}
-            </Button>
-            <Box flexDirection="row">
+          <Box key={`theme-${id}`}>
+            <Button key={`th-${id}`} plain onPress={() => void saveSettings($, x => ({ ...x, theme: id }))}>
+              <Text color={tones.accent}>{isPicked ? PICKED_MARK : ' '}</Text>
+              <Text color={isPicked ? tones.strong : tones.text} bold={isPicked}>{` ${t.name}${' '.repeat(nameColumns - cellWidth(t.name))} `}</Text>
               {swatch.map((c, i) => <Text key={`sw-${id}-${i}`} color={c === '@character' ? 'claude' : c}>■</Text>)}
-            </Box>
+            </Button>
           </Box>
         )
       })}
@@ -235,33 +157,40 @@ function themeTab($: $, el: El, s: HudSettings) {
   )
 }
 
-/** 카드 설정 한 줄. 고르기는 버튼 줄, 글자는 이름 · 안내 · 입력칸을 줄마다 나눠 안내가 잘리지 않게 한다 */
-function optionRow($: $, el: El, columns: number, card: HudCard, o: HudOption, value: string, tones: Tones) {
+/** 카드 설정 하나: 이름 아래에 고르기 목록, 글자는 안내 · 입력칸을 줄마다 나눠 안내가 잘리지 않게 한다 */
+export function optionField($: $, el: El, card: HudCard, o: HudOption, value: string, tones: Tones, form: HudForm) {
   const { Box, Text } = el
   const key = `opt-${card.id}-${o.key}`
   const save = (v: string) => void saveSettings($, x => setOption(x, card.id, o.key, v))
-  if (o.kind === 'choice') return pickList(el, columns, key, o.label, o.choices, value, save)
   const { Input } = el as Pickers
   return (
-    <Box key={`${key}-row`} flexDirection="column">
-      <Text>{o.label}</Text>
-      <Box marginLeft={2} flexDirection="column">
-        {o.placeholder ? <Text color={tones.dim}>{o.placeholder}</Text> : null}
-        {Input
-          ? <Input key={key} placeholder={TEXT_PLACEHOLDER} value={value} submitLabel="저장" onSubmit={v => save(v.trim())} />
-          : <Text color={tones.dim}>{value || '(비어 있음)'} — 이 화면에서는 바꿀 수 없어요</Text>}
-      </Box>
+    <Box key={`${key}-field`} flexDirection="column" marginBottom={1}>
+      <Text bold color={tones.strong}>{o.label}</Text>
+      {o.kind === 'choice'
+        ? choiceList(el, key, choicesInForm(o.choices, form), value, save, tones)
+        : (
+          <Box flexDirection="column">
+            {o.placeholder ? <Text color={tones.dim}>{o.placeholder}</Text> : null}
+            {Input
+              ? <Input key={key} placeholder={TEXT_PLACEHOLDER} value={value} submitLabel="저장" onSubmit={v => save(v.trim())} />
+              : <Text color={tones.dim}>{value || '(비어 있음)'} — 이 화면에서는 바꿀 수 없어요</Text>}
+          </Box>
+        )}
     </Box>
   )
 }
 
-/** 「보일 카드와 순서」 한 줄: 순번 · 보이기 칸(✓) · 위 · 아래. 맨 위·맨 아래의 위·아래도 흐리게 남겨 줄이 흔들리지 않게 한다 */
+/**
+ * 「보일 카드와 순서」 한 줄(시안 1): 순번 · ✓카드 이름(누르면 보이기/숨기기) · 위 · 아래. 모두 테두리 없는 글자.
+ * 맨 위·맨 아래의 위·아래도 흐리게 남겨 줄이 흔들리지 않게 한다
+ */
 function cardOrderRow($: $, el: El, all: Readonly<Record<string, HudCard>>, card: HudCard, i: number, count: number, s: HudSettings, titleColumns: number, tones: Tones) {
   const { Box, Text, Button } = el
   const isShown = !s.hidden.includes(card.id)
   const move = (by: -1 | 1) => () => void saveSettings($, x => moveCard(all, x, card.id, by))
   const still = () => {}
   const title = card.title + ' '.repeat(Math.max(0, titleColumns - cellWidth(card.title)))
+  const isTop = i === 0, isBottom = i === count - 1
   // 줄 아래에 그 카드가 지금 보여 주는 한 줄 요약(입력창 위 줄과 같은 것). 숨긴 카드는 (숨김), 요약이 없으면 (요약 없음)
   const summary = !isShown
     ? <Text color={tones.dim}>(숨김)</Text>
@@ -269,54 +198,41 @@ function cardOrderRow($: $, el: El, all: Readonly<Record<string, HudCard>>, card
   return (
     <Box key={`order-${card.id}`} flexDirection="column">
       <Box flexDirection="row" columnGap={1}>
-        <Text color={tones.dim}>{String(i + 1).padStart(2)}</Text>
-        <Button key={`vis-${card.id}`} variant={isShown ? 'primary' : undefined} onPress={() => void saveSettings($, x => toggleHidden(x, card.id))}>
-          {(isShown ? PICKED_MARK : ' ') + title}
+        <Text color={tones.dim}>{String(i + 1)}</Text>
+        <Button key={`vis-${card.id}`} plain onPress={() => void saveSettings($, x => toggleHidden(x, card.id))}>
+          <Text color={tones.accent}>{isShown ? PICKED_MARK : ' '}</Text>
+          <Text color={isShown ? tones.strong : tones.dim} bold={isShown}>{` ${title}`}</Text>
         </Button>
-        <Button key={`up-${card.id}`} dimColor={i === 0 ? true : undefined} onPress={i === 0 ? still : move(-1)}>위</Button>
-        <Button key={`down-${card.id}`} dimColor={i === count - 1 ? true : undefined} onPress={i === count - 1 ? still : move(1)}>아래</Button>
+        <Button key={`up-${card.id}`} plain dimColor={isTop ? true : undefined} onPress={isTop ? still : move(-1)}>위</Button>
+        <Button key={`down-${card.id}`} plain dimColor={isBottom ? true : undefined} onPress={isBottom ? still : move(1)}>아래</Button>
       </Box>
       {summary ? <Box marginLeft={SUMMARY_INDENT} overflow="hidden">{summary}</Box> : null}
     </Box>
   )
 }
 
-async function cardsTab($: $, el: El, columns: number, s: HudSettings, tones: Tones) {
+/** 카드 쪽: 보일 카드와 순서. 카드별 설정은 모양마다 달라서 「모양」 아래에 있다 */
+export async function cardsPage($: $, el: El, s: HudSettings, tones: Tones) {
   const { Box, Text } = el
   const all = await read($, cards)
   const list = ordered(all, s)
   if (list.length === 0) return <Text color={tones.dim}>보여 줄 카드가 없어요. 부품 mod(cozy-hud-tokens 등)를 설치하세요.</Text>
   const titleColumns = Math.max(...list.map(c => cellWidth(c.title)))
-  const withOptions = list.filter(c => (c.options ?? []).length > 0)
-  const shown = withOptions.filter(c => !s.hidden.includes(c.id))
-  const hidden = withOptions.filter(c => s.hidden.includes(c.id))
   return (
     <Box flexDirection="column">
-      {section(el, columns, tones, 'sec-cards', '보일 카드와 순서', true)}
       {list.map((card, i) => cardOrderRow($, el, all, card, i, list.length, s, titleColumns, tones))}
-      {shown.map(card => {
-        const values = optionValues(card, s)
-        return (
-          <Box key={`card-${card.id}`} flexDirection="column">
-            {section(el, columns, tones, `sec-card-${card.id}`, card.title)}
-            {(card.options ?? []).map(o => optionRow($, el, columns, card, o, values[o.key] ?? o.value, tones))}
-          </Box>
-        )
-      })}
-      {hidden.length > 0
-        ? <Box marginTop={1}><Text color={tones.dim}>{`숨긴 카드(${hidden.map(c => c.title).join(', ')})의 설정은 보이게 하면 나타나요`}</Text></Box>
-        : null}
+      <Box marginTop={1}><Text color={tones.dim}>카드별 설정은 「모양」에 있어요</Text></Box>
     </Box>
   )
 }
 
-async function resetAll($: $) {
+export async function resetAll($: $) {
   mem.undo = await read($, settings)
   await saveSettings($, () => DEFAULTS)
   await update($, view, v => ({ ...v, canUndo: true }))
 }
 
-async function undoReset($: $) {
+export async function undoReset($: $) {
   const before = mem.undo
   mem.undo = null
   await update($, view, v => ({ ...v, canUndo: false }))
@@ -324,45 +240,4 @@ async function undoReset($: $) {
 }
 
 /** 목록(Select)·입력칸(Input)이 없는 화면 */
-const NO_PICKERS = new Set(['mobile'])
-
-export async function drawSettings($: $, table: El, tones: Tones, surface: string, isFocused: boolean, columns: number) {
-  // 모바일 표에도 Select 가 들어 있지만 그려지지 않아서, 화면 종류로 빼 버린다
-  const el = (NO_PICKERS.has(surface) ? { ...table, Select: undefined, Input: undefined } : table) as El
-  const { Box, Text, Button } = el
-  const s = await read($, settings)
-  const v = await read($, view)
-  mem.isSettingsShown = true
-  const body =
-    v.tab === 'character' ? await characterTab($, el, columns, s, tones)
-    : v.tab === 'layout' ? layoutTab($, el, columns, s, tones)
-    : v.tab === 'theme' ? themeTab($, el, s)
-    : await cardsTab($, el, columns, s, tones)
-  return (
-    <Box flexDirection="column">
-      {/* 맨 위 한 줄: 왼쪽 키보드 안내(길면 왼쪽 안에서 줄바꿈), 오른쪽 끝 초기화. 누른 뒤에는 같은 자리에 되돌리기 */}
-      <Box flexDirection="row" justifyContent="space-between" columnGap={1}>
-        <Box flexShrink={1}>
-          {surface === 'mobile' ? null : <Text color={tones.dim}>{isFocused ? KEY_HELP.focused : KEY_HELP.idle}</Text>}
-        </Box>
-        {v.canUndo
-          ? <Button key="undo" variant="primary" onPress={() => void undoReset($)}>되돌리기</Button>
-          : <Button key="reset" onPress={() => void resetAll($)}>초기화</Button>}
-      </Box>
-      <Box flexDirection="row" flexWrap="wrap" columnGap={1}>
-        {(Object.keys(TABS) as HudTab[]).map((tab, i) => (
-          <Button
-            key={`tab-${tab}`}
-            hotkey={String(i + 1)}
-            autoFocus={tab === v.tab ? true : undefined}
-            variant={tab === v.tab ? 'primary' : undefined}
-            onPress={() => void update($, view, x => ({ ...x, tab }))}
-          >
-            {`${i + 1} ${TABS[tab]}`}
-          </Button>
-        ))}
-      </Box>
-      <Box marginTop={1} flexDirection="column">{body}</Box>
-    </Box>
-  )
-}
+export const NO_PICKERS = new Set(['mobile'])

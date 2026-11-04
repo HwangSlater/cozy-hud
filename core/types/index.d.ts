@@ -23,14 +23,29 @@ export type HudCard = {
   lines: readonly HudLine[]
   /** 입력창 위 줄·상태줄에 쓸 한 줄 요약 */
   brief?: HudLine
+  /** 「크게」 모양에서만 lines 아래에 더 보일 세부 줄 */
+  detail?: readonly HudLine[]
+  /** 「작게」 모양에서 카드 대신 보일 이름 · 값 줄들. 없으면 제목 · brief 한 줄 */
+  compact?: readonly HudRow[]
   /** 설정 패널 「카드」 탭에 보일 이 카드의 설정 항목. 고른 값은 hud.option 으로 돌아온다 */
   options?: readonly HudOption[]
 }
 
-/** 카드 설정 항목 하나. value 는 기본값. 값은 모두 글자로 오간다 */
+/** 「작게」 모양의 한 줄: 이름(코어가 칸을 맞춤) · 값. key 는 카드 안에서 줄을 숨길 때 쓴다 */
+export type HudRow = { key: string; label: string; value: HudLine }
+
+/** HUD 모양: 크게(넓은 패널) · 보통 · 작게(좁은 패널) */
+export type HudForm = 'large' | 'medium' | 'small'
+
+/**
+ * 카드 설정 항목 하나. value 는 기본값. 값은 모두 글자로 오간다.
+ * forms: 이 항목을 보일 모양(없으면 모두). 고를 것에도 forms 를 달면 그 모양에서만 보이고,
+ * 지금 모양에 없는 값은 코어가 가장 가까운 값으로 바꿔 알려 준다.
+ */
 export type HudOption =
-  | { key: string; label: string; kind: 'choice'; choices: readonly { value: string; label: string }[]; value: string }
-  | { key: string; label: string; kind: 'text'; placeholder?: string; value: string }
+  | { key: string; label: string; kind: 'choice'; choices: readonly HudChoice[]; value: string; forms?: readonly HudForm[] }
+  | { key: string; label: string; kind: 'text'; placeholder?: string; value: string; forms?: readonly HudForm[] }
+export type HudChoice = { value: string; label: string; forms?: readonly HudForm[] }
 
 /** 코어가 부품에게 알리는 카드 설정 값(기본값에 사용자가 고른 값을 덮은 것) */
 export type HudOptionValues = { card: string; values: Readonly<Record<string, string>> }
@@ -82,25 +97,31 @@ export type HudSpeed = 'off' | 'slow' | 'normal' | 'fast'
 export type HudSleep = 'never' | '5' | '15' | '30'
 /** 도구를 쓸 때 말풍선: 파일 이름까지 · 동작만 · 끔 */
 export type HudToolTalk = 'file' | 'verb' | 'off'
+/** 패널 캐릭터 크기. none = 패널에는 캐릭터를 그리지 않음(「작게」 모양) */
+export type HudPaneSize = HudSize | 'none'
 export type HudSettings = {
+  /** HUD 모양. 모양마다 고를 수 있는 캐릭터 크기·말풍선·카드 설정이 다르다 */
+  form: HudForm
   layout: HudLayout
   character: string
   theme: string
   /** 카드 순서(부품 id). 여기 없는 카드는 뒤에 붙는다 */
   order: readonly string[]
   hidden: readonly string[]
-  size: { pane: HudSize; band: HudSize }
+  /** 「작게」 모양에서 숨긴 줄: 「카드id.줄key」 */
+  hiddenRows: readonly string[]
+  size: { pane: HudPaneSize; band: HudSize }
   motion: { speed: HudSpeed; sleep: HudSleep }
   speech: { tools: HudToolTalk; react: 'on' | 'off' }
   /** 카드별 설정 값: 카드 id → 항목 key → 값 */
   cards: Readonly<Record<string, Readonly<Record<string, string>>>>
 }
 
-/** 설정 패널에서 보고 있는 탭(저장하지 않음) */
-export type HudTab = 'character' | 'layout' | 'theme' | 'cards'
-/** canUndo: 「처음 설정으로」 직후 되돌리기 단추를 보일지 */
-/** picking: 미리보기에서 캐릭터 이름 격자를 펼쳤는지(예전 값에는 없음 = 닫힘) */
-export type HudView = { tab: HudTab; canUndo: boolean; picking?: boolean }
+/**
+ * 설정 패널에서 보고 있는 쪽(저장하지 않음). path: 처음 목록에서 들어간 길(예: ['form', 'size-pane'] = 설정 › 모양 › 캐릭터).
+ * canUndo: 「초기화」 직후 되돌리기 단추를 보일지. picking: 미리보기에서 캐릭터 이름 격자를 펼쳤는지
+ */
+export type HudView = { path: readonly string[]; canUndo: boolean; picking?: boolean }
 
 export type HudMood = 'idle' | 'work' | 'happy' | 'sweat' | 'sleep'
 export type HudLive = {

@@ -17,7 +17,7 @@ const STORE_KEY = 'settings'
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(register·panel 과 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
 const characters = atom({ plugin: 'cozy-hud', key: 'characters' } as const, {} as Readonly<Record<string, HudCharacter>>, { shape: 'characters-2' })
-const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS, { shape: 'settings-2' })
+const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS, { shape: 'settings-3' })
 const live = atom({ plugin: 'cozy-hud', key: 'live' } as const, { mood: 'idle', speech: '', since: 0 } as HudLive, { shape: 'live-1' })
 
 /** 모듈 상태(다시 불러오면 처음부터). 화면에 남겨야 하는 값은 atom 에 둔다 */
@@ -92,8 +92,9 @@ export async function saveSettings($: $, change: (s: HudSettings) => HudSettings
   for (const card of Object.values(await read($, cards))) await sendOptions($, card, next)
   // 배치가 바뀔 때만 HUD 패널을 열고 닫는다(설정 패널을 보는 중에 앞을 가로채지 않게)
   if (next.layout === before.layout) return
-  if (next.layout === 'band') await $.ui.close({ id: PANE })
-  else await $.ui.open({ id: PANE, title: 'HUD' })
+  // 좁은 터미널에서는 ui.open 이 자리가 날 때까지 기다리므로, 버튼 누름(10초 한도)이 막히지 않게 기다리지 않는다
+  const placing = next.layout === 'band' ? $.ui.close({ id: PANE }) : $.ui.open({ id: PANE, title: 'HUD' })
+  void Promise.resolve(placing).catch((err: unknown) => $.ui.log(`cozy-hud: HUD 패널 배치 실패 — ${String(err)}`, { to: 'debug' }))
 }
 
 export function loadStored($: $) {

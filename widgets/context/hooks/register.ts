@@ -10,6 +10,8 @@ const WARN_CHOICES = ['70', '80', '90']
 /** 이 비율부터 위험 색 */
 const DANGER_PERCENT = 92
 const GAUGE_WIDTH = 24
+/** 「작게」 모양 한 줄에 들어가는 게이지 폭 */
+const COMPACT_GAUGE_WIDTH = 8
 const hasWarned = atom({ plugin: 'cozy-hud-context', key: 'hasWarned' } as const, false)
 const options = atom({ plugin: 'cozy-hud-context', key: 'options' } as const, {} as CardOptions, { shape: 'options-1' })
 
@@ -26,8 +28,13 @@ async function publish($: EngineInterface) {
     badge: `${percent}%`,
     lines: [
       [{ gauge: percent / 100, width: GAUGE_WIDTH, tone }, { text: ` ${percent}%`, tone: tone === 'accent' ? 'strong' : tone }],
-      [{ text: `${k(tokens)} / ${k(window)} 토큰 · 남은 공간 ${k(Math.max(0, window - tokens))}`, tone: 'dim' }],
+      [{ text: `${k(tokens)} / ${k(window)} 토큰`, tone: 'dim' }],
     ],
+    detail: [[{ text: `남은 공간 ${k(Math.max(0, window - tokens))}`, tone: 'dim' }]],
+    compact: [{
+      key: 'percent', label: '컨텍스트',
+      value: [{ text: `${percent}% `, tone: tone === 'accent' ? 'strong' : tone }, { gauge: percent / 100, width: COMPACT_GAUGE_WIDTH, tone }],
+    }],
     brief: [{ text: 'ctx ', tone: 'dim' }, { text: `${percent}%`, tone: tone === 'accent' ? 'dim' : tone }],
     options: [{ key: 'warn', label: '경고 시작', kind: 'choice', value: WARN_DEFAULT, choices: WARN_CHOICES.map(v => ({ value: v, label: `${v}%` })) }],
   })

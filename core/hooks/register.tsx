@@ -3,9 +3,10 @@ import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
-import { briefLine, drawCard, drawLine, drawPet, drawSpeech, type Tones } from './draw'
+import { briefLine, drawCard, drawLine, drawPet, drawRows, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
-import { characterNav, drawCharacterGrid, drawSettings, ensurePanes, openSettings, type CharacterNav } from './panel'
+import { drawSettings } from './pages'
+import { characterNav, drawCharacterGrid, ensurePanes, openSettings, type CharacterNav } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
 import {
   PANE, SETTINGS_PANE, addCharacters, loadStored, resetCharacters, mem, saveSettings, sendOptions, setMood, syncFromState, type $,
@@ -14,9 +15,9 @@ import {
 // 엔진 검사는 이 파일 안의 atom 선언만 따라가서, 쓰는 파일마다 같은 이름·키로 선언한다(state.ts 와 같아야 함)
 const cards = atom({ plugin: 'cozy-hud', key: 'cards' } as const, {} as Readonly<Record<string, HudCard>>, { shape: 'cards-1' })
 const characters = atom({ plugin: 'cozy-hud', key: 'characters' } as const, {} as Readonly<Record<string, HudCharacter>>, { shape: 'characters-2' })
-const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS, { shape: 'settings-2' })
+const settings = atom({ plugin: 'cozy-hud', key: 'settings' } as const, DEFAULTS, { shape: 'settings-3' })
 const live = atom({ plugin: 'cozy-hud', key: 'live' } as const, { mood: 'idle', speech: '', since: 0 } as HudLive, { shape: 'live-1' })
-const view = atom({ plugin: 'cozy-hud', key: 'view' } as const, { tab: 'character', canUndo: false } as HudView, { shape: 'view-2' })
+const view = atom({ plugin: 'cozy-hud', key: 'view' } as const, { path: [], canUndo: false } as HudView, { shape: 'view-4' })
 
 /** 기뻐하거나 걱정하는 표정이 남는 시간 */
 const REACT_MS = 2500
@@ -29,6 +30,10 @@ const PREVIEW_INSET = 4
 const MIN_SPEECH_COLUMNS = 16
 /** 캐릭터 이름 버튼의 「[ 」·「 ▾ ]」가 더 차지하는 칸 */
 const NAME_BUTTON_EXTRA = 6
+/** 「[ < ] 이름 칸 [ > ]」 한 줄에서 이름 칸 말고 더 드는 칸(버튼 둘 · 사이 · 이름 버튼 테두리). 이보다 좁으면 두 줄 */
+const NAV_ROW_EXTRA = 5 + 1 + NAME_BUTTON_EXTRA + 1 + 5
+/** 캐릭터 없이 말할 때 앞에 붙이는 표시 */
+const SPEECH_MARK = '▸'
 
 const VERB: Record<string, string> = { Read: '읽는 중', Grep: '찾는 중', Glob: '찾는 중', Edit: '고치는 중', Write: '쓰는 중', Bash: '실행하는 중' }
 
@@ -86,17 +91,34 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
   const stage = nav ? (
     <Box key="stage" flexDirection="column" alignItems="center">
       {pet ? drawPet(el, surface === 'terminal', pet.cells, pet.encoded) : <Text color={tones.dim}>(캐릭터 없음)</Text>}
-      <Box key="ch-nav" flexDirection="row" columnGap={1}>
-        {/* ◀ ▶ 는 터미널·글꼴에 따라 한 칸이 되기도 두 칸이 되기도 해 줄이 흔들려서, 늘 한 칸인 < > 를 쓴다.
-            한 글자짜리는 마우스로 맞히기 어려워 테두리 있는 버튼([ < ])으로 누를 자리를 넓히고, A/D 로도 넘긴다 */}
-        <Button key="ch-prev" label="<" hotkey="a" onPress={nav.prev} />
-        {/* 이름 버튼을 누르면 이름 격자가 펼쳐지고, 다시 누르거나 하나를 고르면 닫힌다 */}
-        <Box width={nav.nameColumns + NAME_BUTTON_EXTRA} justifyContent="center">
-          <Button key="character" onPress={nav.toggle}>{`${nav.label} ${nav.isOpen ? '▴' : '▾'}`}</Button>
+      {columns >= nav.nameColumns + NAV_ROW_EXTRA ? (
+        <Box key="ch-nav" flexDirection="column" alignItems="center">
+          <Box flexDirection="row" columnGap={1}>
+            {/* ◀ ▶ 는 터미널·글꼴에 따라 한 칸이 되기도 두 칸이 되기도 해 줄이 흔들려서, 늘 한 칸인 < > 를 쓴다.
+                한 글자짜리는 마우스로 맞히기 어려워 테두리 있는 버튼([ < ])으로 누를 자리를 넓히고, A/D 로도 넘긴다 */}
+            <Button key="ch-prev" label="<" hotkey="a" onPress={nav.prev} />
+            {/* 이름 버튼을 누르면 이름 격자가 펼쳐지고, 다시 누르거나 하나를 고르면 닫힌다 */}
+            <Box width={nav.nameColumns + NAME_BUTTON_EXTRA} justifyContent="center">
+              <Button key="character" onPress={nav.toggle}>{`${nav.label} ${nav.isOpen ? '▴' : '▾'}`}</Button>
+            </Box>
+            <Button key="ch-next" label=">" hotkey="d" onPress={nav.next} />
+          </Box>
+          <Text color={tones.dim}>{nav.count}</Text>
         </Box>
-        <Button key="ch-next" label=">" hotkey="d" onPress={nav.next} />
-      </Box>
-      <Text color={tones.dim}>{nav.count}</Text>
+      ) : (
+        // 좁은 판: 한 줄에 다 들어가지 않아 넘쳐 빈 줄이 되던 것을, 이름을 위 줄로 올리고 [ < ] 순번 [ > ] 를 아래 줄에
+        <Box key="ch-nav" flexDirection="column" alignItems="center">
+          {/* 버튼을 상자로 감싸야 가운데 맞춤이 먹어 캐릭터 밑 가운데에 선다(그냥 두면 왼쪽으로 붙음) */}
+          <Box justifyContent="center">
+            <Button key="character" onPress={nav.toggle}>{`${nav.label} ${nav.isOpen ? '▴' : '▾'}`}</Button>
+          </Box>
+          <Box flexDirection="row" columnGap={1}>
+            <Button key="ch-prev" label="<" hotkey="a" onPress={nav.prev} />
+            <Text color={tones.dim}>{nav.count.replace(/ /g, '')}</Text>
+            <Button key="ch-next" label=">" hotkey="d" onPress={nav.next} />
+          </Box>
+        </Box>
+      )}
       {nav.isOpen ? drawCharacterGrid(el, nav, columns) : null}
       {drawSpeech(el, speech, tones, ch)}
     </Box>
@@ -108,12 +130,15 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
         {drawSpeech(el, speech, tones, ch)}
       </Box>
     </Box>
-  ) : speech ? <Text color={tones.accent}>{speech}</Text> : null
+    // 캐릭터를 숨겼거나 없으면 상자 없이 「▸ 하는 일」 한 줄(좁은 패널에서 줄이 넘치지 않게 끝을 자름)
+  ) : speech ? <Text color={tones.accent} wrap="truncate-end">{`${SPEECH_MARK} ${speech}`}</Text> : null
   return (
     <Box flexDirection="column">
       {stage}
       {shown.length === 0 ? <Text color={tones.dim}>보여 줄 카드가 없어요. /hud 의 「카드」 탭에서 숨긴 카드를 확인하세요.</Text> : null}
-      {shown.map(card => drawCard(el, card, columns, tones))}
+      {s.form === 'small'
+        ? drawRows(el, shown, s.hiddenRows, columns, tones)
+        : shown.map(card => drawCard(el, card, columns, tones, s.form))}
     </Box>
   )
 }
@@ -220,7 +245,7 @@ export const register: Register = on => {
   })
 
   // ── 그리기 ──
-  // 설정 패널 아래에 HUD 패널을 그대로 그려, 바꾼 값을 탭을 넘기지 않고 본다
+  // 설정 패널 맨 위에 HUD 패널을 그대로 그려(미리보기), 바꾼 값을 탭을 넘기지 않고 본다
   on('ui.render', { component: 'Pane', requestId: SETTINGS_PANE }, async ($, e) => {
     const el = $.ui.resolve(e)
     const { Box, Text } = el
@@ -230,14 +255,15 @@ export const register: Register = on => {
     const nav = await characterNav($)
     if (!isPreview) forgetSite(SETTINGS_PANE)
     return (
+      // 미리보기를 맨 위에 둬 설정 쪽을 오가도 늘 보인다(쪽마다 내용이 짧아 같이 한 화면에 들어간다)
       <Box flexDirection="column">
-        {await drawSettings($, el, tones, e.surface, e.props.isFocused, e.props.bodyColumns)}
-        <Box marginTop={1} flexDirection="column" borderStyle="round" borderColor={tones.accent} paddingX={1}>
+        <Box marginBottom={1} flexDirection="column" borderStyle="round" borderColor={tones.accent} paddingX={1}>
           <Text bold color={tones.accent}>미리보기</Text>
           {isPreview
             ? await drawHud($, el, e.surface, e.props.bodyColumns - PREVIEW_INSET, SETTINGS_PANE, nav)
             : <Text color={tones.dim}>지금은 입력창 위 줄에만 보여요. 아래 줄에서 바로 확인하세요.</Text>}
         </Box>
+        {await drawSettings($, el, tones, e.surface, e.props.bodyColumns)}
       </Box>
     )
   })

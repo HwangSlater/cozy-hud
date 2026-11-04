@@ -14,7 +14,9 @@ It moves while Claude works, jumps when a task is done, and sweats when context 
 
 [한국어](README.md) · **English** · [日本語](README.ja.md) · [简体中文](README.zh-CN.md)
 
-<img src="docs/images/characters.png" alt="The 14 cozy-hud characters" width="760">
+<img src="docs/images/demo-work.gif" alt="The HUD while Claude fixes bugs in shop.py: the bubble says what it is doing, and the token and context cards fill in when the reply ends" width="820">
+
+<sub>Claude fixing bugs (3× speed). The bubble says what it is doing; the token and context cards fill in when the reply ends.</sub>
 
 </div>
 
@@ -31,11 +33,6 @@ Once Claude is working, the screen is just text piling up. It is hard to tell at
 - The character taps its feet while Claude works, jumps when a task finishes, sweats when context passes 80%, and falls asleep after a long rest.
 - A speech bubble says what Claude is doing with each tool, like "reading register.tsx".
 - Install only the cards you want: tokens, context, to-dos. Any mix looks like one design.
-
-<div align="center">
-<img src="docs/images/hud.png" alt="The HUD pane in use: character, speech bubble, to-do, context and token cards" width="360">
-<img src="docs/images/hud-bun.png" alt="The HUD pane with the steamed bun at small size" width="360">
-</div>
 
 ## Get started
 
@@ -67,20 +64,35 @@ Two tabs open: "HUD" and "HUD settings". That's it.
 
 Characters: Claude, cat, penguin, chick, rabbit, fox, arctic fox, puppy, frog, bear, panda, hamster, strawberry mochi, steamed bun.
 
+<div align="center"><img src="docs/images/characters.png" alt="The 14 cozy-hud characters" width="760"></div>
+
 ## Change things
 
-Use the mouse or keyboard in the "HUD settings" tab. Changes show up in the preview below right away and stay across sessions.
+Use the mouse or keyboard in the "HUD settings" tab. The preview stays at the top; below it, step into a list such as "Form › Character" and pick. Click an earlier part of the path at the top ("Settings › Form › Character") to jump straight back to that level. Changes stay across sessions.
 
-| Tab | What you pick |
+<div align="center">
+<img src="docs/images/demo-settings.gif" alt="The HUD settings tab: flipping characters and switching the form between large, medium and small, with the preview updating at once" width="400">
+
+<sub>Driven with the keyboard here. Clicking works the same.</sub>
+</div>
+
+| List | What you pick |
 | --- | --- |
-| Character | Size in the pane and above the prompt (large, medium, small), motion speed, time until sleep |
-| Layout · bubbles | Where it shows, tool bubbles, reactions to finishing and warnings |
+| Form | HUD form (large, medium, small) and only the settings that form uses: character size, bubbles, per-card settings |
+| Layout | Where it shows, size above the prompt, motion speed, time until sleep, reactions to finishing and warnings |
 | Theme | Auto · Basic · Amber · Mint · Mono |
-| Cards | Show or hide, order, per-card settings |
+| Cards | Show or hide, order |
+
+Pick the form that fits your pane. **Large** (50+ columns) adds detail lines to cards, **medium** is the regular look, and **small** (22–32 columns) turns each card into one line, with each line switchable on or off.
+
+<table align="center">
+<tr><th>Large</th><th>Medium</th><th>Small</th></tr>
+<tr><td valign="top"><img src="docs/images/form-large.png" alt="Large: Wide pane · detail lines" width="260"><br><sub>Wide pane · detail lines</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="Medium: Regular pane · cards" width="260"><br><sub>Regular pane · cards</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="Small: Narrow pane · one line per card" width="260"><br><sub>Narrow pane · one line per card</sub></td></tr>
+</table>
 
 Flip characters with `[ < ]` `[ > ]` under the preview, or click the name to pick from the full list.
 
-Keyboard: press `Ctrl+X` then `Tab` to enter the settings tab. `Tab` next item · `Enter` pick · `1`–`4` tabs · `A`/`D` previous/next character · `Esc` leave.
+Keyboard: press `Ctrl+X` then `Tab` to enter the settings tab. `Tab` next item · `Enter` pick · `A`/`D` previous/next character · `Esc` leave.
 
 Quick commands:
 
@@ -89,6 +101,7 @@ Quick commands:
 /hud character cat      change character
 /hud theme mint         change theme
 /hud layout pane        show in the pane only
+/hud form small         change the HUD form (large, medium, small)
 /hud reset              back to defaults
 ```
 

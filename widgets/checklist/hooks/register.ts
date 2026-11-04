@@ -17,7 +17,10 @@ const mem = { template: '', path: '', mtime: -1, isPolling: false }
 function optionsFor(fileDefault: string) {
   return [
     { key: 'file', label: '체크리스트 파일', kind: 'text' as const, value: fileDefault, placeholder: '비우면 Claude의 할 일 도구를 따라가요 · {home} {session} 사용 가능' },
-    { key: 'lines', label: '보일 항목 수', kind: 'choice' as const, value: LINES_DEFAULT, choices: ['5', '8', '12'].map(v => ({ value: v, label: `${v}개` })) },
+    {
+      key: 'lines', label: '보일 항목 수', kind: 'choice' as const, value: LINES_DEFAULT, forms: ['large' as const, 'medium' as const],
+      choices: [{ value: '5', label: '5개' }, { value: '8', label: '8개' }, { value: '12', label: '12개', forms: ['large' as const] }],
+    },
   ]
 }
 
@@ -58,6 +61,7 @@ async function publish($: EngineInterface) {
     await $.hud.put({
       id: 'checklist', title: '할 일', badge: '0',
       lines: [[{ text: mem.path ? '파일에 체크리스트(- [ ] 할 일)가 없어요' : '아직 할 일이 없어요', tone: 'dim' }]],
+      compact: [{ key: 'progress', label: '할 일', value: [{ text: '없음', tone: 'dim' }] }],
       options: optionsFor(mem.template),
     })
     return
@@ -77,6 +81,10 @@ async function publish($: EngineInterface) {
       ...(hiddenCount > 0 ? [[{ text: `  …그 밖에 ${hiddenCount}개`, tone: 'dim' as const }]] : []),
     ],
     brief: [{ text: `할 일 ${done}/${list.length}`, tone: 'dim' }, ...(current ? [{ text: ` · ${current.text}`, tone: 'text' as const }] : [])],
+    compact: [{
+      key: 'progress', label: '할 일',
+      value: [{ text: `${done}/${list.length}`, tone: 'strong' }, ...(current ? [{ text: ` ${current.text}`, tone: 'text' as const }] : [])],
+    }],
     options: optionsFor(mem.template),
   })
 }
