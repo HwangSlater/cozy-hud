@@ -7,6 +7,8 @@ export const DEFAULTS: HudSettings = {
   motion: { speed: 'normal', sleep: '15' },
   speech: { tools: 'file', react: 'on' },
   notify: { after: '60', sound: 'on' },
+  petButton: 'on',
+  today: 'off',
   cards: {},
 }
 
@@ -30,6 +32,7 @@ export const TOOL_TALK: Record<HudToolTalk, string> = { file: '파일 이름까�
 export const REACT: Record<'on' | 'off', string> = { on: '켜기', off: '끄기' }
 export const NOTIFY_AFTER: Record<HudNotifyAfter, string> = { off: '끄기', '30': '30초 넘게 걸리면', '60': '1분 넘게 걸리면', '180': '3분 넘게 걸리면' }
 export const SOUND: Record<'on' | 'off', string> = { on: '켜기', off: '끄기' }
+export const SHOW: Record<'on' | 'off', string> = { on: '보이기', off: '숨기기' }
 
 export type ThemeSpec = { name: string; tones: Record<string, string>; sweat: string }
 export type Catalog = {
@@ -88,6 +91,8 @@ export function fromStore(raw: unknown): HudSettings {
     motion: { speed: pick(SPEEDS, motion.speed, DEFAULTS.motion.speed), sleep: pick(SLEEPS, motion.sleep, DEFAULTS.motion.sleep) },
     speech: { tools: pick(TOOL_TALK, speech.tools, DEFAULTS.speech.tools), react: pick(REACT, speech.react, DEFAULTS.speech.react) },
     notify: { after: pick(NOTIFY_AFTER, notify.after, DEFAULTS.notify.after), sound: pick(SOUND, notify.sound, DEFAULTS.notify.sound) },
+    petButton: pick(SHOW, v.petButton, DEFAULTS.petButton),
+    today: pick(SHOW, v.today, DEFAULTS.today),
     cards,
   }, form)
 }

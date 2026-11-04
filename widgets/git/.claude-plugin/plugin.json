@@ -1,0 +1,13 @@
+{
+  "name": "cozy-hud-git",
+  "version": "0.1.0",
+  "description": "cozy-hud 부품: 지금 브랜치, 바뀐 파일, 올리지 않은 커밋을 보여 준다.",
+  "author": {
+    "name": "HwangSlater"
+  },
+  "license": "MIT",
+  "dependencies": [
+    "cozy-hud"
+  ],
+  "types": "./types/index.d.ts"
+}

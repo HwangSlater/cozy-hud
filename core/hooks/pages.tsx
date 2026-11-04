@@ -6,7 +6,7 @@ import type { HudCard, HudForm, HudOption, HudSettings, HudView } from '../types
 import { cellWidth, rowsOf, type Tones } from './draw'
 import { NO_PICKERS, PICKED_MARK, cardsPage, choiceList, optionField, resetAll, themePage, undoReset, type El } from './panel'
 import {
-  DEFAULTS, FORMS, FORM_HINT, FORM_PANE_SIZES, FORM_TOOL_TALK, LAYOUTS, NOTIFY_AFTER, PANE_SIZES, REACT, SIZES, SOUND, SLEEPS, SPEEDS, TOOL_TALK,
+  DEFAULTS, FORMS, FORM_HINT, FORM_PANE_SIZES, FORM_TOOL_TALK, LAYOUTS, NOTIFY_AFTER, PANE_SIZES, REACT, SHOW, SIZES, SOUND, SLEEPS, SPEEDS, TOOL_TALK,
   applyForm, optionInForm, optionValues, ordered, toggleRow,
 } from './settings'
 import { mem, saveSettings, type $ } from './state'
@@ -116,16 +116,18 @@ function layoutPages($: $, el: El, s: HudSettings, tones: Tones): Page[] {
     { id: 'size-band', label: '입력창 위 크기', value: SIZES[s.size.band], draw: () => choiceList(el, 'size-band', table(SIZES), s.size.band, v => save(x => ({ ...x, size: { ...x.size, band: v as HudSettings['size']['band'] } })), tones) },
     { id: 'speed', label: '속도', value: SPEEDS[s.motion.speed], draw: () => choiceList(el, 'speed', table(SPEEDS), s.motion.speed, v => save(x => ({ ...x, motion: { ...x.motion, speed: v as HudSettings['motion']['speed'] } })), tones) },
     { id: 'sleep', label: '잠들기', value: SLEEPS[s.motion.sleep], draw: () => choiceList(el, 'sleep', table(SLEEPS), s.motion.sleep, v => save(x => ({ ...x, motion: { ...x.motion, sleep: v as HudSettings['motion']['sleep'] } })), tones) },
+    { id: 'pet-button', label: '쓰다듬기 버튼', value: SHOW[s.petButton], draw: () => choiceList(el, 'pet-button', table(SHOW), s.petButton, v => save(x => ({ ...x, petButton: v as 'on' | 'off' })), tones) },
     { id: 'talk-react', label: '끝냄·경고 반응', value: REACT[s.speech.react], draw: () => choiceList(el, 'talk-react', table(REACT), s.speech.react, v => save(x => ({ ...x, speech: { ...x.speech, react: v as 'on' | 'off' } })), tones) },
   ]
 }
 
-/** 오래 걸린 답변이 끝났을 때 알림 */
+/** 오래 걸린 답변이 끝났을 때 알림, 오늘 기록 카드 */
 function notifyPages($: $, el: El, s: HudSettings, tones: Tones): Page[] {
   const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
   return [
     { id: 'notify-after', label: '끝남 알림', value: NOTIFY_AFTER[s.notify.after], draw: () => choiceList(el, 'notify-after', table(NOTIFY_AFTER), s.notify.after, v => save(x => ({ ...x, notify: { ...x.notify, after: v as HudSettings['notify']['after'] } })), tones) },
     { id: 'notify-sound', label: '알림 소리', value: SOUND[s.notify.sound], draw: () => choiceList(el, 'notify-sound', table(SOUND), s.notify.sound, v => save(x => ({ ...x, notify: { ...x.notify, sound: v as 'on' | 'off' } })), tones) },
+    { id: 'today', label: '오늘 기록 카드', value: SHOW[s.today], draw: () => choiceList(el, 'today', table(SHOW), s.today, v => save(x => ({ ...x, today: v as 'on' | 'off' })), tones) },
   ]
 }
 
@@ -135,7 +137,7 @@ async function rootPages($: $, el: El, s: HudSettings, tones: Tones): Promise<Pa
   return [
     { id: 'form', label: '모양', value: FORMS[s.form], items: await formPages($, el, s, tones, shown) },
     { id: 'layout', label: '배치', value: LAYOUTS[s.layout], items: layoutPages($, el, s, tones) },
-    { id: 'notify', label: '알림', value: s.notify.after === 'off' ? NOTIFY_AFTER.off : SOUND[s.notify.sound] === SOUND.on ? '토스트 + 소리' : '토스트', items: notifyPages($, el, s, tones) },
+    { id: 'notify', label: '알림·기록', value: s.notify.after === 'off' ? NOTIFY_AFTER.off : SOUND[s.notify.sound] === SOUND.on ? '토스트 + 소리' : '토스트', items: notifyPages($, el, s, tones) },
     { id: 'theme', label: '테마', value: mem.themes[s.theme]?.name ?? s.theme, draw: () => themePage($, el, s, tones) },
     { id: 'cards', label: '카드', value: `${shown.length}/${list.length}개`, draw: () => cardsPage($, el, s, tones) },
   ]

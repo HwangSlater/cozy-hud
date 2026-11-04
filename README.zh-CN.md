@@ -49,6 +49,10 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 /plugin install cozy-hud-tokens@cozy-hud
 /plugin install cozy-hud-context@cozy-hud
 /plugin install cozy-hud-checklist@cozy-hud
+/plugin install cozy-hud-usage@cozy-hud
+/plugin install cozy-hud-tools@cozy-hud
+/plugin install cozy-hud-git@cozy-hud
+/plugin install cozy-hud-agents@cozy-hud
 ```
 
 会打开 "HUD" 和 "HUD 设置" 两个标签页。就这样。
@@ -63,6 +67,10 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 | `cozy-hud-tokens` | 本次回复和整个会话的令牌用量，每次回复的柱状图 |
 | `cozy-hud-context` | 上下文用量仪表，可以选择警告起点 % |
 | `cozy-hud-checklist` | 实时显示 Claude 的待办列表。有会话清单文件(`~/.claude/checklists/<会话>.md`)时自动跟随，也可以指定其他 Markdown 文件 |
+| `cozy-hud-usage` | 5 小时和每周用量上限及距重置的时间，本次回复和会话的时长与费用 |
+| `cozy-hud-tools` | Claude 刚用过的工具，按时间倒序(失败的用警告色) |
+| `cozy-hud-git` | 当前分支、改动的文件、未推送的提交 |
+| `cozy-hud-agents` | 每个正在运行的子代理的名称、正在做的事和已用时间 |
 
 角色:Claude、猫、企鹅、小鸡、兔子、狐狸、北极狐、小狗、青蛙、熊、熊猫、仓鼠、草莓大福、包子。
 
@@ -81,8 +89,8 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 | 列表 | 可选内容 |
 | --- | --- |
 | 样式 | HUD 样式(大·中·小)以及该样式用到的设置:角色大小、气泡、每张卡片的设置 |
-| 布局 | 显示位置、输入框上方的大小、动作速度、入睡时间、完成和警告时的反应 |
-| 通知 | 耗时较长的回复结束时提醒(关闭·超过 30 秒·1 分钟·3 分钟)、提示音 |
+| 布局 | 显示位置、输入框上方的大小、动作速度、入睡时间、抚摸按钮、完成和警告时的反应 |
+| 通知·记录 | 耗时较长的回复结束时提醒(关闭·超过 30 秒·1 分钟·3 分钟)、提示音、"今天" 记录卡片(回复·改动文件·工作时长，默认关闭) |
 | 主题 | 自动 · 基本 · 琥珀 · 薄荷 · 黑白 |
 | 卡片 | 显示或隐藏、顺序 |
 
@@ -93,7 +101,7 @@ Claude 工作时它跟着动，完成任务时会跳起来，上下文快满时�
 <tr><td valign="top"><img src="docs/images/form-large.png" alt="大: 宽面板 · 含详细行" width="260"><br><sub>宽面板 · 含详细行</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="中: 普通面板 · 卡片" width="260"><br><sub>普通面板 · 卡片</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="小: 窄面板 · 每张卡片一行" width="260"><br><sub>窄面板 · 每张卡片一行</sub></td></tr>
 </table>
 
-在预览下方用 `[ < ]` `[ > ]` 切换角色，或点名字从完整列表中选择。
+在预览下方用 `[ < ]` `[ > ]` 切换角色，或点名字从完整列表中选择。 点角色下方的 "抚摸"，角色会开心地跳一下(可在布局里隐藏)。
 
 键盘:按 `Ctrl+X` 再按 `Tab` 进入设置标签页。`Tab` 下一项 · `Enter` 选择 · `A`/`D` 切换角色 · `Esc` 离开。
 

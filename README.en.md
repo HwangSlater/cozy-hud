@@ -49,6 +49,10 @@ Add the cards you want.
 /plugin install cozy-hud-tokens@cozy-hud
 /plugin install cozy-hud-context@cozy-hud
 /plugin install cozy-hud-checklist@cozy-hud
+/plugin install cozy-hud-usage@cozy-hud
+/plugin install cozy-hud-tools@cozy-hud
+/plugin install cozy-hud-git@cozy-hud
+/plugin install cozy-hud-agents@cozy-hud
 ```
 
 Two tabs open: "HUD" and "HUD settings". That's it.
@@ -63,6 +67,10 @@ Two tabs open: "HUD" and "HUD settings". That's it.
 | `cozy-hud-tokens` | Tokens for this reply and the whole session, a bar chart per reply |
 | `cozy-hud-context` | Context usage gauge with a warning threshold you choose |
 | `cozy-hud-checklist` | Claude's to-do list, live. Follows the session checklist file (`~/.claude/checklists/<session>.md`) automatically when there is one, or any Markdown file you choose |
+| `cozy-hud-usage` | 5-hour and weekly usage limits with time until reset, plus reply and session time and cost |
+| `cozy-hud-tools` | The tools Claude just used, newest first (failures in the warning color) |
+| `cozy-hud-git` | Current branch, changed files, unpushed commits |
+| `cozy-hud-agents` | Each running subagent with its name, what it is doing, and elapsed time |
 
 Characters: Claude, cat, penguin, chick, rabbit, fox, arctic fox, puppy, frog, bear, panda, hamster, strawberry mochi, steamed bun.
 
@@ -81,8 +89,8 @@ Use the mouse or keyboard in the "HUD settings" tab. The preview stays at the to
 | List | What you pick |
 | --- | --- |
 | Form | HUD form (large, medium, small) and only the settings that form uses: character size, bubbles, per-card settings |
-| Layout | Where it shows, size above the prompt, motion speed, time until sleep, reactions to finishing and warnings |
-| Alerts | Notify when a long reply finishes (off, or after 30 s, 1 min, 3 min), alert sound |
+| Layout | Where it shows, size above the prompt, motion speed, time until sleep, pet button, reactions to finishing and warnings |
+| Alerts & stats | Notify when a long reply finishes (off, or after 30 s, 1 min, 3 min), alert sound, a "Today" card (replies, files edited, time worked; off by default) |
 | Theme | Auto · Basic · Amber · Mint · Mono |
 | Cards | Show or hide, order |
 
@@ -93,7 +101,7 @@ Pick the form that fits your pane. **Large** (50+ columns) adds detail lines to 
 <tr><td valign="top"><img src="docs/images/form-large.png" alt="Large: Wide pane · detail lines" width="260"><br><sub>Wide pane · detail lines</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="Medium: Regular pane · cards" width="260"><br><sub>Regular pane · cards</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="Small: Narrow pane · one line per card" width="260"><br><sub>Narrow pane · one line per card</sub></td></tr>
 </table>
 
-Flip characters with `[ < ]` `[ > ]` under the preview, or click the name to pick from the full list.
+Flip characters with `[ < ]` `[ > ]` under the preview, or click the name to pick from the full list. Click "Pet" under the character and it hops once (hide the button under Layout).
 
 Keyboard: press `Ctrl+X` then `Tab` to enter the settings tab. `Tab` next item · `Enter` pick · `A`/`D` previous/next character · `Esc` leave.
 

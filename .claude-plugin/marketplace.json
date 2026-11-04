@@ -24,6 +24,26 @@
       "name": "cozy-hud-checklist",
       "source": "./widgets/checklist",
       "description": "부품: 할 일 목록 실시간"
+    },
+    {
+      "name": "cozy-hud-usage",
+      "source": "./widgets/usage",
+      "description": "부품: 사용 한도·시간·비용"
+    },
+    {
+      "name": "cozy-hud-tools",
+      "source": "./widgets/tools",
+      "description": "부품: 최근 도구 기록"
+    },
+    {
+      "name": "cozy-hud-git",
+      "source": "./widgets/git",
+      "description": "부품: git 브랜치·바뀐 파일"
+    },
+    {
+      "name": "cozy-hud-agents",
+      "source": "./widgets/agents",
+      "description": "부품: 서브에이전트"
     }
   ]
 }

@@ -49,6 +49,10 @@ Claude Code で一度だけインストールします。
 /plugin install cozy-hud-tokens@cozy-hud
 /plugin install cozy-hud-context@cozy-hud
 /plugin install cozy-hud-checklist@cozy-hud
+/plugin install cozy-hud-usage@cozy-hud
+/plugin install cozy-hud-tools@cozy-hud
+/plugin install cozy-hud-git@cozy-hud
+/plugin install cozy-hud-agents@cozy-hud
 ```
 
 「HUD」と「HUD 設定」の 2 つのタブが開きます。これで完了です。
@@ -63,6 +67,10 @@ Claude Code で一度だけインストールします。
 | `cozy-hud-tokens` | 今回の返答とセッション全体のトークン量、返答ごとの棒グラフ |
 | `cozy-hud-context` | コンテキスト使用率のゲージ。警告の開始 % を選べます |
 | `cozy-hud-checklist` | Claude の ToDo リストをリアルタイムで。セッションのチェックリストファイル(`~/.claude/checklists/<セッション>.md`)があれば自動で追い、ほかの Markdown ファイルも指定できます |
+| `cozy-hud-usage` | 5 時間・週間の利用上限とリセットまでの時間、返答・セッションの時間と費用 |
+| `cozy-hud-tools` | Claude がいま使ったツールを新しい順に(失敗は警告色) |
+| `cozy-hud-git` | いまのブランチ、変更ファイル、push していないコミット |
+| `cozy-hud-agents` | 動いているサブエージェントごとの名前・作業・経過時間 |
 
 キャラクター:クロード、ネコ、ペンギン、ヒヨコ、ウサギ、キツネ、ホッキョクギツネ、子犬、カエル、クマ、パンダ、ハムスター、いちご大福、肉まん。
 
@@ -81,8 +89,8 @@ Claude Code で一度だけインストールします。
 | 一覧 | 選べるもの |
 | --- | --- |
 | 形 | HUD の形(大・中・小)と、その形で使う設定だけ:キャラクターのサイズ、吹き出し、カードごとの設定 |
-| 配置 | 表示する場所、入力欄の上のサイズ、動きの速さ、眠るまでの時間、完了・警告への反応 |
-| 通知 | 長くかかった返答が終わったら通知(オフ・30 秒・1 分・3 分以上)、通知音 |
+| 配置 | 表示する場所、入力欄の上のサイズ、動きの速さ、眠るまでの時間、なでるボタン、完了・警告への反応 |
+| 通知・記録 | 長くかかった返答が終わったら通知(オフ・30 秒・1 分・3 分以上)、通知音、「今日」の記録カード(返答・変更ファイル・作業時間、初期はオフ) |
 | テーマ | 自動・基本・アンバー・ミント・モノクロ |
 | カード | 表示・非表示、順番 |
 
@@ -93,7 +101,7 @@ Claude Code で一度だけインストールします。
 <tr><td valign="top"><img src="docs/images/form-large.png" alt="大: 広いパネル · 詳細行まで" width="260"><br><sub>広いパネル · 詳細行まで</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="中: ふつうのパネル · カード" width="260"><br><sub>ふつうのパネル · カード</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="小: 狭いパネル · カードごとに 1 行" width="260"><br><sub>狭いパネル · カードごとに 1 行</sub></td></tr>
 </table>
 
-キャラクターはプレビュー下の `[ < ]` `[ > ]` で切り替えるか、名前を押して一覧から選びます。
+キャラクターはプレビュー下の `[ < ]` `[ > ]` で切り替えるか、名前を押して一覧から選びます。 キャラクター下の「なでる」を押すと一度よろこびます(配置で隠せます)。
 
 キーボード:`Ctrl+X` のあと `Tab` で設定タブに入り、`Tab` 次の項目・`Enter` 選択・`A`/`D` キャラクター切り替え・`Esc` 抜ける。
 

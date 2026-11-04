@@ -6,6 +6,7 @@ import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../ty
 import { briefLine, drawCard, drawLine, drawPet, drawRows, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
 import { notifyDone } from './notify'
+import { addFile, countToday, showToday } from './today'
 import { drawSettings } from './pages'
 import { characterNav, drawCharacterGrid, ensurePanes, openSettings, type CharacterNav } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
@@ -65,6 +66,18 @@ async function wakeAfterTurn($: $) {
   const sleep = (await read($, settings)).motion.sleep
   if (sleep !== 'never') mem.sleepTimer = $.clock.after(Number(sleep) * MINUTE, () => void setMood($, 'sleep', ''))
 }
+
+/** 「쓰다듬기」: 캐릭터가 한 번 기뻐하고(반응을 켰으면 「헤헤」), 오늘 기록에 센다 */
+async function petPet($: $) {
+  const s = await read($, settings)
+  await setMood($, 'happy', s.speech.react === 'on' ? '헤헤' : '')
+  mem.reactTimer?.cancel()
+  mem.reactTimer = $.clock.after(REACT_MS, () => void restMood($))
+  await countToday($, s.today === 'on', t => ({ ...t, pets: t.pets + 1 }))
+}
+
+/** 고친 파일로 세는 도구 */
+const EDIT_TOOLS = new Set(['Edit', 'Write', 'NotebookEdit', 'MultiEdit'])
 
 /** 도구 이름과 입력으로 말풍선 글. 설정에 따라 파일 이름까지 · 하는 일만 · 없음 */
 function toolTalk(tool: string, input: { file_path?: string; pattern?: string; command?: string }, mode: HudSettings['speech']['tools']) {
@@ -126,7 +139,10 @@ async function drawHud($: $, el: ReturnType<$['ui']['resolve']>, surface: string
   ) : pet ? (
     // 캐릭터 옆에 말풍선 자리가 모자라면(크게 고른 좁은 판) 말풍선을 아래로 내린다
     <Box flexDirection={columns - (pet.cells[0]?.length ?? 0) - 2 >= MIN_SPEECH_COLUMNS ? 'row' : 'column'}>
-      {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
+      <Box flexDirection="column" alignItems="center">
+        {drawPet(el, surface === 'terminal', pet.cells, pet.encoded)}
+        {s.petButton === 'on' ? <Button key="pet" label="쓰다듬기" onPress={() => void petPet($)} /> : null}
+      </Box>
       <Box flexDirection="column" marginLeft={columns - (pet.cells[0]?.length ?? 0) - 2 >= MIN_SPEECH_COLUMNS ? 2 : 0} flexShrink={1}>
         {drawSpeech(el, speech, tones, ch)}
       </Box>
@@ -187,6 +203,7 @@ export const register: Register = on => {
     await $.command.register({ name: 'hud', description: 'cozy-hud 설정 패널 열기', argumentHint: '[layout|character|theme|reset]' })
     const answer = await next(e)
     await $.hud.ready({})
+    await showToday($, saved.today === 'on').catch(() => undefined)
     return answer
   })
 
@@ -232,7 +249,18 @@ export const register: Register = on => {
       const talk = toolTalk(e.tool, e as unknown as { file_path?: string; pattern?: string; command?: string }, (await read($, settings)).speech.tools)
       if ((await read($, live)).mood === 'work') await update($, live, v => ({ ...v, speech: talk }))
     }
-    return next(e)
+    const ran = await next(e)
+    // 도구가 이미 돌았으니 여기서 난 오류는 삼킨다(바깥 .catch 가 도구를 한 번 더 돌리지 않게)
+    try {
+      const input = e as unknown as { file_path?: string; notebook_path?: string }
+      const path = input.file_path ?? input.notebook_path
+      if (e.agentId === undefined && EDIT_TOOLS.has(e.tool) && path && ran.deny === undefined && !ran.isError) {
+        await countToday($, (await read($, settings)).today === 'on', t => addFile(t, path))
+      }
+    } catch (err) {
+      $.ui.log(`cozy-hud: 오늘 기록을 세지 못했어요 — ${String(err)}`, { to: 'debug' })
+    }
+    return ran
   })
     // 실패해도 도구 결과는 그대로 넘긴다
     .catch(($, e, next) => next(e))
@@ -240,7 +268,9 @@ export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
     if (e.agentId === undefined) {
       await wakeAfterTurn($)
-      await notifyDone($, await read($, settings), e.durationMs, e.isAborted)
+      const s = await read($, settings)
+      await notifyDone($, s, e.durationMs, e.isAborted)
+      if (!e.isAborted) await countToday($, s.today === 'on', t => ({ ...t, answers: t.answers + 1, workMs: t.workMs + e.durationMs })).catch(() => undefined)
       void ensurePanes($, (await read($, settings)).layout)
     }
     return next(e)

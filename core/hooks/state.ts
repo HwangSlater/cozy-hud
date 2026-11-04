@@ -6,6 +6,7 @@ import type { EngineInterface } from 'claude-code'
 
 import type { HudCard, HudCharacter, HudLive, HudMood, HudSettings } from '../types'
 import { forgetArt, syncTimer } from './motion'
+import { showToday } from './today'
 import { DEFAULTS, optionValues, type ThemeSpec } from './settings'
 
 export type $ = EngineInterface
@@ -90,6 +91,9 @@ export async function saveSettings($: $, change: (s: HudSettings) => HudSettings
   forgetArt()
   syncTimer($)
   for (const card of Object.values(await read($, cards))) await sendOptions($, card, next)
+  if (next.today !== before.today) {
+    await showToday($, next.today === 'on').catch((err: unknown) => $.ui.log(`cozy-hud: 오늘 기록 카드를 바꾸지 못했어요 — ${String(err)}`, { to: 'debug' }))
+  }
   // 배치가 바뀔 때만 HUD 패널을 열고 닫는다(설정 패널을 보는 중에 앞을 가로채지 않게)
   if (next.layout === before.layout) return
   // 좁은 터미널에서는 ui.open 이 자리가 날 때까지 기다리므로, 버튼 누름(10초 한도)이 막히지 않게 기다리지 않는다

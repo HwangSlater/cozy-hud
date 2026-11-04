@@ -1,0 +1,13 @@
+{
+  "name": "cozy-hud-tools",
+  "version": "0.1.0",
+  "description": "cozy-hud 부품: Claude가 방금 쓴 도구를 시간순으로 보여 준다. 실패한 도구는 경고색.",
+  "author": {
+    "name": "HwangSlater"
+  },
+  "license": "MIT",
+  "dependencies": [
+    "cozy-hud"
+  ],
+  "types": "./types/index.d.ts"
+}

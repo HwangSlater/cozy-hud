@@ -1,0 +1,13 @@
+{
+  "name": "cozy-hud-agents",
+  "version": "0.1.0",
+  "description": "cozy-hud 부품: 돌고 있는 서브에이전트마다 이름·하는 일·걸린 시간을 보여 준다.",
+  "author": {
+    "name": "HwangSlater"
+  },
+  "license": "MIT",
+  "dependencies": [
+    "cozy-hud"
+  ],
+  "types": "./types/index.d.ts"
+}

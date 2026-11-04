@@ -47,6 +47,10 @@ Claude Code에서 한 번만 설치하세요.
 /plugin install cozy-hud-tokens@cozy-hud
 /plugin install cozy-hud-context@cozy-hud
 /plugin install cozy-hud-checklist@cozy-hud
+/plugin install cozy-hud-usage@cozy-hud
+/plugin install cozy-hud-tools@cozy-hud
+/plugin install cozy-hud-git@cozy-hud
+/plugin install cozy-hud-agents@cozy-hud
 ```
 
 설치하면 「HUD」와 「HUD 설정」 두 탭이 열려요. 끝이에요.
@@ -61,6 +65,10 @@ Claude Code에서 한 번만 설치하세요.
 | `cozy-hud-tokens` | 이번 답변과 세션 전체의 토큰 사용량, 답변별 막대그래프 |
 | `cozy-hud-context` | 컨텍스트 사용률 게이지. 경고 시작 %를 고를 수 있어요 |
 | `cozy-hud-checklist` | Claude의 할 일 목록을 실시간으로. 세션 체크리스트 파일(`~/.claude/checklists/<세션>.md`)이 있으면 자동으로 따라가고, 다른 마크다운 파일을 지정할 수도 있어요 |
+| `cozy-hud-usage` | 5시간·주간 사용 한도와 리셋까지 남은 시간, 이번 답변·세션 시간과 비용 |
+| `cozy-hud-tools` | Claude가 방금 쓴 도구를 시간순으로(실패한 것은 경고색) |
+| `cozy-hud-git` | 지금 브랜치, 바뀐 파일, 올리지 않은 커밋 |
+| `cozy-hud-agents` | 돌고 있는 서브에이전트마다 이름·하는 일·걸린 시간 |
 
 캐릭터는 클로드, 고양이, 펭귄, 병아리, 토끼, 여우, 북극여우, 강아지, 개구리, 곰, 판다, 햄스터, 찹쌀떡, 호빵이에요.
 
@@ -79,8 +87,8 @@ Claude Code에서 한 번만 설치하세요.
 | 목록 | 고르는 것 |
 | --- | --- |
 | 모양 | HUD 모양(크게·보통·작게)과 그 모양에서 쓰는 설정만: 캐릭터 크기, 말풍선, 카드별 설정 |
-| 배치 | 보일 곳(패널·입력창 위), 입력창 위 크기, 움직임 속도, 잠드는 시간, 끝냄·경고 반응 |
-| 알림 | 오래 걸린 답변이 끝나면 알림(끄기·30초·1분·3분 넘게), 알림 소리 |
+| 배치 | 보일 곳(패널·입력창 위), 입력창 위 크기, 움직임 속도, 잠드는 시간, 쓰다듬기 버튼, 끝냄·경고 반응 |
+| 알림·기록 | 오래 걸린 답변이 끝나면 알림(끄기·30초·1분·3분 넘게), 알림 소리, 「오늘」 기록 카드(답변·고친 파일·일한 시간, 기본 끔) |
 | 테마 | 자동 · 기본 · 호박 · 민트 · 흑백 |
 | 카드 | 카드 보임·숨김, 순서 |
 
@@ -91,7 +99,7 @@ Claude Code에서 한 번만 설치하세요.
 <tr><td valign="top"><img src="docs/images/form-large.png" alt="크게: 넓은 패널 · 세부 줄까지" width="260"><br><sub>넓은 패널 · 세부 줄까지</sub></td><td valign="top"><img src="docs/images/form-medium.png" alt="보통: 보통 패널 · 카드" width="260"><br><sub>보통 패널 · 카드</sub></td><td valign="top"><img src="docs/images/form-small.png" alt="작게: 좁은 패널 · 카드마다 한 줄" width="260"><br><sub>좁은 패널 · 카드마다 한 줄</sub></td></tr>
 </table>
 
-캐릭터는 미리보기 아래 `[ < ]` `[ > ]`로 넘기거나, 이름을 눌러 전체 목록에서 골라요.
+캐릭터는 미리보기 아래 `[ < ]` `[ > ]`로 넘기거나, 이름을 눌러 전체 목록에서 골라요. 캐릭터 밑 「쓰다듬기」를 누르면 한 번 기뻐해요(배치에서 숨길 수 있어요).
 
 키보드: `Ctrl+X` 다음 `Tab`으로 설정 탭에 들어가면 `Tab` 다음 칸 · `Enter` 고르기 · `A`/`D` 캐릭터 넘기기 · `Esc` 나가기.
 

@@ -117,6 +117,10 @@ export type HudSettings = {
   speech: { tools: HudToolTalk; react: 'on' | 'off' }
   /** 오래 걸린 답변이 끝나면 알림(토스트, 소리) */
   notify: { after: HudNotifyAfter; sound: 'on' | 'off' }
+  /** 패널 캐릭터 밑 「쓰다듬기」 버튼 */
+  petButton: 'on' | 'off'
+  /** 「오늘」 기록 카드(답변·고친 파일·일한 시간·쓰다듬기). 기본 끔 */
+  today: 'on' | 'off'
   /** 카드별 설정 값: 카드 id → 항목 key → 값 */
   cards: Readonly<Record<string, Readonly<Record<string, string>>>>
 }

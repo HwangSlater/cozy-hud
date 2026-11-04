@@ -147,6 +147,34 @@ test('입력창 위 줄은 다른 mod 가 그린 줄을 지우지 않고 함께 
   await ui.unmount()
 })
 
+test('알림·기록에서 오늘 기록 카드를 켜고, 배치에서 쓰다듬기 버튼을 숨긴다', async ($, on) => {
+  const { saved } = await start($, on)
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  await ui.press({ key: 'go-notify' })
+  await ui.press({ key: 'go-notify.today' })
+  await ui.press({ key: 'today-on' })
+  expect((saved.at(-1) as { today?: string })?.today).toBe('on')
+  await ui.press({ key: 'crumb-0' })
+  await ui.press({ key: 'go-layout' })
+  await ui.press({ key: 'go-layout.pet-button' })
+  await ui.press({ key: 'pet-button-off' })
+  expect((saved.at(-1) as { petButton?: string })?.petButton).toBe('off')
+  await ui.unmount()
+})
+
+test('HUD 패널 캐릭터 밑에 쓰다듬기 버튼이 있고, 누르면 오늘 기록에 센다', async ($, on) => {
+  const { saved } = await start($, on)
+  // 시험에 있는 캐릭터(찹쌀떡)로 바꿔 둔다
+  const settingsUi = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  await settingsUi.press({ key: 'ch-next' })
+  await settingsUi.unmount()
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, requestId: 'cozy-hud', props: { ...SETTINGS_PANE.props, title: 'HUD' }, surface: 'terminal' })
+  expect(await ui.find({ type: 'Button', key: 'pet' })).toBeDefined()
+  await ui.press({ key: 'pet' })
+  expect((saved as { pets?: number }[]).filter(v => v.pets !== undefined).at(-1)?.pets).toBe(1)
+  await ui.unmount()
+})
+
 test('/hud 를 이름 없이 치면 설정 패널을 연다', async ($, on) => {
   const { opened } = await start($, on)
   const r = await $.command.run({ command: 'hud', args: '' } as Parameters<typeof $.command.run>[0])
