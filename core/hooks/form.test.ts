@@ -2,7 +2,7 @@
 import { expect, test } from 'claude-code/testing'
 
 import type { HudCard } from '../types'
-import { fitLine, rowsOf } from './draw'
+import { clipLine, fitLine, rowsOf } from './draw'
 import { DEFAULTS, applyForm, fromStore, nearest, optionValues } from './settings'
 
 test('모양이 없던 예전 설정은 패널 크기로 모양을 정한다', () => {
@@ -53,4 +53,13 @@ test('좁으면 게이지는 폭을 줄이고 막대그래프는 최근 것만 �
 test('작게 모양의 줄: compact 가 없으면 제목 · 한 줄 요약', () => {
   expect(rowsOf({ id: 'x', title: '엑스', lines: [], brief: [{ text: '3' }] })).toEqual([{ key: 'brief', label: '엑스', value: [{ text: '3' }] }])
   expect(rowsOf({ id: 'x', title: '엑스', lines: [] })).toEqual([])
+})
+
+test('칸을 넘는 글자는 미리 자르고, 가운뎃점처럼 폭이 애매한 글자는 두 칸으로 센다', () => {
+  const line = [{ text: '30/34', tone: 'strong' as const }, { text: ' 새 카드(시간·비용)' }]
+  const clipped = clipLine(line, 16)
+  const width = clipped.reduce((sum, p) => sum + [...('text' in p ? p.text : '')].reduce((w, ch) => w + (/[가-힣·…]/.test(ch) ? 2 : 1), 0), 0)
+  expect(width).toBeLessThanOrEqual(16)
+  expect(clipped.at(-1) && 'text' in clipped.at(-1)! ? (clipped.at(-1) as { text: string }).text.endsWith('…') : false).toBe(true)
+  expect(clipLine(line, 40)).toEqual(line)
 })

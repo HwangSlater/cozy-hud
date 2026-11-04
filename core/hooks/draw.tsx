@@ -10,6 +10,38 @@ const WIDE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦]/
 /** 터미널 칸 수(한글·한자는 2칸) */
 export const cellWidth = (text: string) => [...text].reduce((sum, ch) => sum + (WIDE.test(ch) ? 2 : 1), 0)
 
+/**
+ * 터미널·글꼴에 따라 한 칸 또는 두 칸으로 그려지는 글자(가운뎃점·말줄임·화살표·따옴표 등).
+ * 글자 조각을 칸에 맞춰 자를 때는 두 칸으로 세어, 넓게 그려져도 줄이 넘쳐 다음 줄이 비지 않게 한다
+ */
+const AMBIGUOUS = /[¡-¿×÷‐-‧‰-⁞←-⇿①-⓿■-◿☀-➿]/
+const safeWidth = (text: string) => [...text].reduce((sum, ch) => sum + (WIDE.test(ch) || AMBIGUOUS.test(ch) ? 2 : 1), 0)
+const CLIP_MARK = '…'
+
+/** 줄의 글자 조각을 칸 수 안으로 자른다(게이지·막대그래프 폭은 그대로 셈). 잘랐으면 끝에 말줄임 */
+export function clipLine(line: HudLine, columns: number): HudLine {
+  const used = (p: HudPiece) => ('text' in p ? safeWidth(p.text) : cellWidth(pieceText(p)) + ('gauge' in p ? p.width - cellWidth(pieceText(p)) : 0))
+  if (line.reduce((sum, p) => sum + used(p), 0) <= columns) return line
+  const room = columns - safeWidth(CLIP_MARK)
+  const out: HudPiece[] = []
+  let sum = 0
+  for (const p of line) {
+    if (!('text' in p)) {
+      if (sum + used(p) > room) break
+      out.push(p); sum += used(p); continue
+    }
+    let text = ''
+    for (const ch of p.text) {
+      const w = safeWidth(ch)
+      if (sum + w > room) break
+      text += ch; sum += w
+    }
+    out.push({ ...p, text: text + (text.length < p.text.length ? CLIP_MARK : '') })
+    if (text.length < p.text.length) return out
+  }
+  return out
+}
+
 const SPARK = '▁▂▃▄▅▆▇█'
 
 function pieceText(piece: HudPiece): string {
@@ -40,7 +72,7 @@ export function fitLine(line: HudLine, columns: number): HudLine {
 /** 한 줄 = 조각마다 Text 하나. columns 를 주면 그 칸에 맞춰 게이지·막대그래프를 줄인다 */
 export function drawLine(el: El, raw: HudLine, tones: Tones, key: string, columns?: number) {
   const { Box, Text } = el
-  const line = columns === undefined ? raw : fitLine(raw, columns)
+  const line = columns === undefined ? raw : clipLine(fitLine(raw, columns), columns)
   return (
     <Box key={key} flexDirection="row">
       <Text wrap="truncate-end">

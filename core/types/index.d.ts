@@ -95,6 +95,8 @@ export type HudLayout = 'pane' | 'band' | 'both'
 export type HudSpeed = 'off' | 'slow' | 'normal' | 'fast'
 /** 잠드는 시간(분). never = 잠들지 않음 */
 export type HudSleep = 'never' | '5' | '15' | '30'
+/** 답변이 이만큼(초) 넘게 걸렸을 때만 끝남 알림. off = 알리지 않음 */
+export type HudNotifyAfter = 'off' | '30' | '60' | '180'
 /** 도구를 쓸 때 말풍선: 파일 이름까지 · 동작만 · 끔 */
 export type HudToolTalk = 'file' | 'verb' | 'off'
 /** 패널 캐릭터 크기. none = 패널에는 캐릭터를 그리지 않음(「작게」 모양) */
@@ -113,6 +115,8 @@ export type HudSettings = {
   size: { pane: HudPaneSize; band: HudSize }
   motion: { speed: HudSpeed; sleep: HudSleep }
   speech: { tools: HudToolTalk; react: 'on' | 'off' }
+  /** 오래 걸린 답변이 끝나면 알림(토스트, 소리) */
+  notify: { after: HudNotifyAfter; sound: 'on' | 'off' }
   /** 카드별 설정 값: 카드 id → 항목 key → 값 */
   cards: Readonly<Record<string, Readonly<Record<string, string>>>>
 }

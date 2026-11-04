@@ -5,6 +5,7 @@ import type { Register } from 'claude-code'
 import type { HudCard, HudCharacter, HudLive, HudSettings, HudView } from '../types'
 import { briefLine, drawCard, drawLine, drawPet, drawRows, drawSpeech, type Tones } from './draw'
 import { drawnAt, forgetSite, petArt } from './motion'
+import { notifyDone } from './notify'
 import { drawSettings } from './pages'
 import { characterNav, drawCharacterGrid, ensurePanes, openSettings, type CharacterNav } from './panel'
 import { DEFAULTS, arrange, fromStore, runCommand, type ThemeSpec } from './settings'
@@ -239,6 +240,7 @@ export const register: Register = on => {
   on('turn.complete', async ($, e, next) => {
     if (e.agentId === undefined) {
       await wakeAfterTurn($)
+      await notifyDone($, await read($, settings), e.durationMs, e.isAborted)
       void ensurePanes($, (await read($, settings)).layout)
     }
     return next(e)
@@ -286,13 +288,19 @@ export const register: Register = on => {
       if (pet) drawnAt(mem.bandSite, pet.encoded)
       else forgetSite(mem.bandSite)
     }
+    // 입력창 위 줄은 하나를 여러 mod 가 같이 쓴다. 아래(다른 mod·엔진)가 그린 것을 받아 우리 줄 밑에 함께 둔다
+    // (next 를 넘기지 않으면 다른 mod 의 줄이 사라진다)
+    const below = await next(e)
     return (
-      <Box flexDirection="row">
-        {pet ? drawPet(el, e.surface === 'terminal', pet.cells, pet.encoded) : null}
-        <Box flexDirection="column" marginLeft={pet ? 2 : 0} flexShrink={1}>
-          {drawSpeech(el, v.speech, tones, ch)}
-          {brief.length ? drawLine(el, brief, tones, 'brief') : null}
+      <Box flexDirection="column">
+        <Box flexDirection="row">
+          {pet ? drawPet(el, e.surface === 'terminal', pet.cells, pet.encoded) : null}
+          <Box flexDirection="column" marginLeft={pet ? 2 : 0} flexShrink={1}>
+            {drawSpeech(el, v.speech, tones, ch)}
+            {brief.length ? drawLine(el, brief, tones, 'brief') : null}
+          </Box>
         </Box>
+        {below}
       </Box>
     )
   })

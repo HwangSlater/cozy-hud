@@ -6,7 +6,7 @@ import type { HudCard, HudForm, HudOption, HudSettings, HudView } from '../types
 import { cellWidth, rowsOf, type Tones } from './draw'
 import { NO_PICKERS, PICKED_MARK, cardsPage, choiceList, optionField, resetAll, themePage, undoReset, type El } from './panel'
 import {
-  DEFAULTS, FORMS, FORM_HINT, FORM_PANE_SIZES, FORM_TOOL_TALK, LAYOUTS, PANE_SIZES, REACT, SIZES, SLEEPS, SPEEDS, TOOL_TALK,
+  DEFAULTS, FORMS, FORM_HINT, FORM_PANE_SIZES, FORM_TOOL_TALK, LAYOUTS, NOTIFY_AFTER, PANE_SIZES, REACT, SIZES, SOUND, SLEEPS, SPEEDS, TOOL_TALK,
   applyForm, optionInForm, optionValues, ordered, toggleRow,
 } from './settings'
 import { mem, saveSettings, type $ } from './state'
@@ -120,12 +120,22 @@ function layoutPages($: $, el: El, s: HudSettings, tones: Tones): Page[] {
   ]
 }
 
+/** 오래 걸린 답변이 끝났을 때 알림 */
+function notifyPages($: $, el: El, s: HudSettings, tones: Tones): Page[] {
+  const save = (change: (s: HudSettings) => HudSettings) => void saveSettings($, change)
+  return [
+    { id: 'notify-after', label: '끝남 알림', value: NOTIFY_AFTER[s.notify.after], draw: () => choiceList(el, 'notify-after', table(NOTIFY_AFTER), s.notify.after, v => save(x => ({ ...x, notify: { ...x.notify, after: v as HudSettings['notify']['after'] } })), tones) },
+    { id: 'notify-sound', label: '알림 소리', value: SOUND[s.notify.sound], draw: () => choiceList(el, 'notify-sound', table(SOUND), s.notify.sound, v => save(x => ({ ...x, notify: { ...x.notify, sound: v as 'on' | 'off' } })), tones) },
+  ]
+}
+
 async function rootPages($: $, el: El, s: HudSettings, tones: Tones): Promise<Page[]> {
   const list = ordered(await read($, cards), s)
   const shown = list.filter(c => !s.hidden.includes(c.id))
   return [
     { id: 'form', label: '모양', value: FORMS[s.form], items: await formPages($, el, s, tones, shown) },
     { id: 'layout', label: '배치', value: LAYOUTS[s.layout], items: layoutPages($, el, s, tones) },
+    { id: 'notify', label: '알림', value: s.notify.after === 'off' ? NOTIFY_AFTER.off : SOUND[s.notify.sound] === SOUND.on ? '토스트 + 소리' : '토스트', items: notifyPages($, el, s, tones) },
     { id: 'theme', label: '테마', value: mem.themes[s.theme]?.name ?? s.theme, draw: () => themePage($, el, s, tones) },
     { id: 'cards', label: '카드', value: `${shown.length}/${list.length}개`, draw: () => cardsPage($, el, s, tones) },
   ]

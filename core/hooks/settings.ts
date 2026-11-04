@@ -1,11 +1,12 @@
 // 사용자가 고른 값. 설정 패널과 /hud 명령이 바꾸고, 바뀐 값은 $.store 에 남는다.
-import type { HudCard, HudCharacter, HudChoice, HudForm, HudLayout, HudOption, HudPaneSize, HudSettings, HudSize, HudSleep, HudSpeed, HudToolTalk } from '../types'
+import type { HudCard, HudCharacter, HudChoice, HudForm, HudLayout, HudNotifyAfter, HudOption, HudPaneSize, HudSettings, HudSize, HudSleep, HudSpeed, HudToolTalk } from '../types'
 
 export const DEFAULTS: HudSettings = {
   form: 'medium', layout: 'both', character: 'claude', theme: 'auto', order: [], hidden: [], hiddenRows: [],
   size: { pane: 'medium', band: 'medium' },
   motion: { speed: 'normal', sleep: '15' },
   speech: { tools: 'file', react: 'on' },
+  notify: { after: '60', sound: 'on' },
   cards: {},
 }
 
@@ -27,6 +28,8 @@ export const SPEEDS: Record<HudSpeed, string> = { fast: '빠르게', normal: '�
 export const SLEEPS: Record<HudSleep, string> = { '5': '5분', '15': '15분', '30': '30분', never: '안 잠듦' }
 export const TOOL_TALK: Record<HudToolTalk, string> = { file: '파일 이름까지', verb: '하는 일만', off: '말 안 함' }
 export const REACT: Record<'on' | 'off', string> = { on: '켜기', off: '끄기' }
+export const NOTIFY_AFTER: Record<HudNotifyAfter, string> = { off: '끄기', '30': '30초 넘게 걸리면', '60': '1분 넘게 걸리면', '180': '3분 넘게 걸리면' }
+export const SOUND: Record<'on' | 'off', string> = { on: '켜기', off: '끄기' }
 
 export type ThemeSpec = { name: string; tones: Record<string, string>; sweat: string }
 export type Catalog = {
@@ -65,7 +68,7 @@ export function fromStore(raw: unknown): HudSettings {
   const v = (raw ?? {}) as Record<string, unknown>
   const obj = (x: unknown) => (x && typeof x === 'object' ? (x as Record<string, unknown>) : {})
   const list = (x: unknown) => (Array.isArray(x) ? x.filter((s): s is string => typeof s === 'string') : [])
-  const size = obj(v.size), motion = obj(v.motion), speech = obj(v.speech)
+  const size = obj(v.size), motion = obj(v.motion), speech = obj(v.speech), notify = obj(v.notify)
   const cards: Record<string, Record<string, string>> = {}
   for (const [id, values] of Object.entries(obj(v.cards))) {
     cards[id] = Object.fromEntries(Object.entries(obj(values)).filter((e): e is [string, string] => typeof e[1] === 'string'))
@@ -84,6 +87,7 @@ export function fromStore(raw: unknown): HudSettings {
     size: { pane, band: pick(SIZES, size.band, DEFAULTS.size.band) },
     motion: { speed: pick(SPEEDS, motion.speed, DEFAULTS.motion.speed), sleep: pick(SLEEPS, motion.sleep, DEFAULTS.motion.sleep) },
     speech: { tools: pick(TOOL_TALK, speech.tools, DEFAULTS.speech.tools), react: pick(REACT, speech.react, DEFAULTS.speech.react) },
+    notify: { after: pick(NOTIFY_AFTER, notify.after, DEFAULTS.notify.after), sound: pick(SOUND, notify.sound, DEFAULTS.notify.sound) },
     cards,
   }, form)
 }

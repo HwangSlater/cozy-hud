@@ -53,6 +53,8 @@ Add the cards you want.
 
 Two tabs open: "HUD" and "HUD settings". That's it.
 
+**Requirements** · Claude Code with mods (2.1.287 or later) · Draws in the terminal and the desktop app (not in `claude -p` or remote sessions) · Pane at least 22 columns wide, 50+ for the large form · No network access
+
 ## What's inside
 
 | Mod | What it does |
@@ -60,7 +62,7 @@ Two tabs open: "HUD" and "HUD settings". That's it.
 | `cozy-hud` | Core (required). Side pane, the line above the prompt, settings, 14 characters |
 | `cozy-hud-tokens` | Tokens for this reply and the whole session, a bar chart per reply |
 | `cozy-hud-context` | Context usage gauge with a warning threshold you choose |
-| `cozy-hud-checklist` | Claude's to-do list, live. Can also follow a Markdown checklist file |
+| `cozy-hud-checklist` | Claude's to-do list, live. Follows the session checklist file (`~/.claude/checklists/<session>.md`) automatically when there is one, or any Markdown file you choose |
 
 Characters: Claude, cat, penguin, chick, rabbit, fox, arctic fox, puppy, frog, bear, panda, hamster, strawberry mochi, steamed bun.
 
@@ -80,6 +82,7 @@ Use the mouse or keyboard in the "HUD settings" tab. The preview stays at the to
 | --- | --- |
 | Form | HUD form (large, medium, small) and only the settings that form uses: character size, bubbles, per-card settings |
 | Layout | Where it shows, size above the prompt, motion speed, time until sleep, reactions to finishing and warnings |
+| Alerts | Notify when a long reply finishes (off, or after 30 s, 1 min, 3 min), alert sound |
 | Theme | Auto · Basic · Amber · Mint · Mono |
 | Cards | Show or hide, order |
 

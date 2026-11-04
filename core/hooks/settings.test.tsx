@@ -124,6 +124,29 @@ test('목록이 없는 화면(모바일)에서는 버튼 줄로 고른다', asyn
   await ui.unmount()
 })
 
+test('알림 목록에서 끝남 알림 시간과 소리를 고른다', async ($, on) => {
+  const { saved } = await start($, on)
+  const ui = await $.ui.mount({ ...SETTINGS_PANE, surface: 'terminal' })
+  await ui.press({ key: 'go-notify' })
+  await ui.press({ key: 'go-notify.notify-after' })
+  await ui.press({ key: 'notify-after-180' })
+  expect((saved.at(-1) as { notify?: { after?: string } })?.notify?.after).toBe('180')
+  await ui.press({ key: 'crumb-1' })
+  await ui.press({ key: 'go-notify.notify-sound' })
+  await ui.press({ key: 'notify-sound-off' })
+  expect((saved.at(-1) as { notify?: { sound?: string } })?.notify).toEqual({ after: '180', sound: 'off' })
+  await ui.unmount()
+})
+
+test('입력창 위 줄은 다른 mod 가 그린 줄을 지우지 않고 함께 둔다', async ($, on) => {
+  // 시험의 훅은 cozy-hud 아래에 선다: 다른 mod 가 그린 줄 역할
+  on('ui.render', { component: 'AbovePrompt' }, () => ({ type: 'Text', props: {}, children: ['다른 mod 의 줄'] }) as never)
+  await start($, on)
+  const ui = await $.ui.mount({ plugin: 'cozy-hud', component: 'AbovePrompt', surface: 'terminal', props: { hasSurvey: false, isWorking: false, maxRows: 8, bodyColumns: 80 } } as never)
+  expect(JSON.stringify(await ui.drawn())).toContain('다른 mod 의 줄')
+  await ui.unmount()
+})
+
 test('/hud 를 이름 없이 치면 설정 패널을 연다', async ($, on) => {
   const { opened } = await start($, on)
   const r = await $.command.run({ command: 'hud', args: '' } as Parameters<typeof $.command.run>[0])

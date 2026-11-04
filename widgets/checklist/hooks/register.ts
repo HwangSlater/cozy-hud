@@ -8,15 +8,23 @@ import type { CardOptions, ChecklistItem, ChecklistStatus } from '../types'
 const LINES_DEFAULT = '8'
 /** 파일을 다시 확인하는 간격 */
 const POLL_MS = 3000
+/** 파일 칸을 비웠을 때 먼저 찾아보는 세션 체크리스트 파일(있으면 그것을, 없으면 할 일 도구를 따라감) */
+const AUTO_TEMPLATE = '{home}/.claude/checklists/{session}.md'
+/** 파일을 못 찾았을 때 mtime 자리에 두는 표시 */
+const MISSING = -2
 const items = atom({ plugin: 'cozy-hud-checklist', key: 'items' } as const, [] as readonly ChecklistItem[], { shape: 'items-1' })
 const options = atom({ plugin: 'cozy-hud-checklist', key: 'options' } as const, {} as CardOptions, { shape: 'options-1' })
 
-/** template: 사용자가 적은 경로({home}·{session} 그대로), path: 실제 경로 */
-const mem = { template: '', path: '', mtime: -1, isPolling: false }
+/** template: 사용자가 적은 경로({home}·{session} 그대로), path: 실제 경로, isAuto: 칸을 비워 자동으로 찾는 중 */
+const mem = { template: '', path: '', mtime: -1, isPolling: false, isAuto: false }
+
+/** 파일을 따라가는지: 경로가 있고, 자동으로 찾는 중이면 파일을 찾았을 때만(못 찾으면 할 일 도구를 따라간다) */
+export const followsFile = (s: { path: string; isAuto: boolean; mtime: number }) => s.path !== '' && !(s.isAuto && s.mtime < 0)
+const isFollowingFile = () => followsFile(mem)
 
 function optionsFor(fileDefault: string) {
   return [
-    { key: 'file', label: '체크리스트 파일', kind: 'text' as const, value: fileDefault, placeholder: '비우면 Claude의 할 일 도구를 따라가요 · {home} {session} 사용 가능' },
+    { key: 'file', label: '체크리스트 파일', kind: 'text' as const, value: fileDefault, placeholder: '비우면 자동(세션 체크리스트 파일, 없으면 할 일 도구) · {home} {session} 사용 가능' },
     {
       key: 'lines', label: '보일 항목 수', kind: 'choice' as const, value: LINES_DEFAULT, forms: ['large' as const, 'medium' as const],
       choices: [{ value: '5', label: '5개' }, { value: '8', label: '8개' }, { value: '12', label: '12개', forms: ['large' as const] }],
@@ -60,7 +68,7 @@ async function publish($: EngineInterface) {
   if (list.length === 0) {
     await $.hud.put({
       id: 'checklist', title: '할 일', badge: '0',
-      lines: [[{ text: mem.path ? '파일에 체크리스트(- [ ] 할 일)가 없어요' : '아직 할 일이 없어요', tone: 'dim' }]],
+      lines: [[{ text: isFollowingFile() ? '파일에 체크리스트(- [ ] 할 일)가 없어요' : '아직 할 일이 없어요', tone: 'dim' }]],
       compact: [{ key: 'progress', label: '할 일', value: [{ text: '없음', tone: 'dim' }] }],
       options: optionsFor(mem.template),
     })
@@ -93,9 +101,14 @@ async function pollFile($: EngineInterface) {
   if (!mem.path) return
   const stat = await $.fs.stat(mem.path).catch(() => null)
   if (!stat) {
-    // 경로가 틀렸거나 파일이 없으면 카드에 알린다(한 번만)
-    if (mem.mtime !== -2) {
-      mem.mtime = -2
+    // 자동으로 찾는 파일은 아직 없을 수 있다(세션 중에 생기면 그때부터 따라감). 할 일 도구 목록은 그대로 둔다
+    if (mem.isAuto) {
+      mem.mtime = MISSING
+      return
+    }
+    // 사람이 적은 경로가 틀렸거나 파일이 없으면 카드에 알린다(한 번만)
+    if (mem.mtime !== MISSING) {
+      mem.mtime = MISSING
       await $.hud.put({ id: 'checklist', title: '할 일', badge: '!', lines: [[{ text: `파일을 찾을 수 없어요: ${mem.path}`, tone: 'warn' }]], options: optionsFor(mem.template) })
     }
     return
@@ -111,20 +124,20 @@ async function resolvePath($: EngineInterface, template: string): Promise<string
   return template.replaceAll('{home}', home).replaceAll('{session}', await $.session.id())
 }
 
-/** 따라갈 파일을 바꾼다. 비우면 Claude의 할 일 도구를 따라간다 */
+/** 따라갈 파일을 바꾼다. 비우면 세션 체크리스트 파일을 자동으로 찾고, 없으면 Claude의 할 일 도구를 따라간다 */
 async function useFile($: EngineInterface, template: string) {
   mem.template = template
-  mem.path = await resolvePath($, template)
+  mem.isAuto = template === ''
+  mem.path = await resolvePath($, template || AUTO_TEMPLATE)
   mem.mtime = -1
   if (mem.path && !mem.isPolling) {
     mem.isPolling = true
     $.clock.every(POLL_MS, () => void pollFile($).catch(() => undefined))
   }
-  if (mem.path) await pollFile($).catch(() => undefined)
-  else {
-    await update($, items, () => [])
-    await publish($)
-  }
+  // 앞서 따라가던 목록을 비우고 새로 읽는다(자동인데 파일이 없으면 빈 채로 할 일 도구를 기다림)
+  await update($, items, () => [])
+  await publish($)
+  await pollFile($).catch(() => undefined)
 }
 
 export const register: Register = (on, config) => {
@@ -148,10 +161,10 @@ export const register: Register = (on, config) => {
     return next(e)
   })
 
-  // 파일을 쓰지 않을 때만 Claude의 할 일 도구를 따라간다
+  // 파일을 따라가지 않을 때만 Claude의 할 일 도구를 따라간다
   on('tool.call', { tool: 'TodoWrite' }, async ($, e, next) => {
     const ran = await next(e)
-    if (!mem.path && e.agentId === undefined && ran.deny === undefined && !ran.isError) {
+    if (!isFollowingFile() && e.agentId === undefined && ran.deny === undefined && !ran.isError) {
       await replace($, e.todos.map((t, i) => ({ id: `t${i}`, text: t.content, status: t.status })))
     }
     return ran
@@ -161,7 +174,7 @@ export const register: Register = (on, config) => {
 
   on('tool.call', { tool: 'TaskCreate' }, async ($, e, next) => {
     const ran = await next(e)
-    if (!mem.path && e.agentId === undefined && ran.deny === undefined && !ran.isError && ran.result) {
+    if (!isFollowingFile() && e.agentId === undefined && ran.deny === undefined && !ran.isError && ran.result) {
       const id = ran.result.task.id
       await replace($, [...(await read($, items)), { id, text: e.subject, status: 'pending' }])
     }
@@ -172,7 +185,7 @@ export const register: Register = (on, config) => {
 
   on('tool.call', { tool: 'TaskUpdate' }, async ($, e, next) => {
     const ran = await next(e)
-    if (!mem.path && e.agentId === undefined && ran.deny === undefined && !ran.isError) {
+    if (!isFollowingFile() && e.agentId === undefined && ran.deny === undefined && !ran.isError) {
       const list = await read($, items)
       const status = e.status
       const changed = status === 'deleted'
